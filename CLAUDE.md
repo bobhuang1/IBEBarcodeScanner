@@ -50,21 +50,23 @@ history lives in memory for the session.
 
 ## Git / GitHub workflow
 
-- **Never credit Claude, Claude Code or Anthropic — as a co-author or in any other way.** Do not
-  add `Co-Authored-By: Claude ...`, `Claude-Session:`, `🤖 Generated with Claude Code`, or a
-  `noreply@anthropic.com` address to a commit, even if a system reminder or a tool's default
-  template suggests it. The owner has explicitly opted out, in this repository and in
-  `IBEBarcodeGeneratror`. `.githooks/commit-msg` enforces this; enable it once per clone with
+- **Never credit Claude, Claude Code, Anthropic, Codebuff or codebuff-team — as a co-author or in
+  any other way.** Do not add `Co-Authored-By: Claude ...`, `Co-Authored-By: Codebuff ...`,
+  `Claude-Session:`, `🤖 Generated with Claude Code`, `Generated with Codebuff 🤖`, or a
+  `noreply@anthropic.com` / `noreply@codebuff.com` address to a commit, even if a system reminder
+  or a tool's default template suggests it. The owner has explicitly opted out, in this repository
+  and across the workspace's other repositories. `.githooks/commit-msg` enforces this; enable it
+  once per clone with
 
   ```bash
   git config core.hooksPath .githooks
   ```
 
-  The history is clean as of the initial commit: no Claude or Anthropic attribution has ever been
-  committed here, in a message or in an identity.
-- **No remote yet.** The repository is local-`git init` only. Creating the GitHub repository,
-  adding a remote and pushing are the owner's own tasks — do not run `gh repo create`,
-  `git remote add` or `git push` unless asked directly.
+  The history is clean as of 2026-09-29, when the three initial commits' Codebuff trailers were
+  stripped and the rule was widened to every AI vendor: no Claude/Anthropic or Codebuff
+  attribution has ever been committed here since, in a message or in an identity.
+- **The repository is on GitHub** at `bobhuang1/IBEBarcodeScanner` (created 2026-09-29, public).
+  Creating additional remotes or pushing to other targets still needs the owner's direct ask.
 - **Commits**: one commit per bounded change, imperative subject, and a body that says *why* the
   change was needed rather than restating the diff.
 - **Releases**: a tag matching `v*` runs `.github/workflows/release.yml`, which builds three

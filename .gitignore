@@ -1,0 +1,48 @@
+## Build results
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+artifacts/
+*.binlog
+
+## .NET / Visual Studio
+.vs/
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+*.csproj.user
+
+## Rider / VS Code
+.idea/
+.vscode/
+*.DotSettings.user
+
+## MAUI / Android / iOS build output
+*.apk
+*.aab
+*.ipa
+*.app/
+*.dSYM/
+*.keystore
+*.jks
+*.mobileprovision
+*.p12
+platform-tools/
+
+## NuGet
+*.nupkg
+*.snupkg
+packages/
+.nuget/
+
+## Tooling / scratch script output
+.freebuff/
+__pycache__/
+*.pyc
+
+## OS noise
+.DS_Store
+Thumbs.db
+desktop.ini

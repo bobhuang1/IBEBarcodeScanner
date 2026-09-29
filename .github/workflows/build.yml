@@ -1,0 +1,64 @@
+name: build
+
+on:
+  push:
+    branches:
+      - master
+      - main
+  pull_request:
+  workflow_dispatch:
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  tests:
+    name: Build and test (core logic)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      # The core library has no platform dependency, so its tests run anywhere and fast.
+      - name: Test
+        run: dotnet test tests/IBEBarcode.Scanner.Core.Tests --configuration Release
+
+  android:
+    name: Android build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install MAUI Android workload
+        run: dotnet workload install maui-android
+
+      # Android builds on Linux, which makes this the strongest signal on every push.
+      - name: Build
+        run: dotnet build src/IBEBarcode.Scanner/IBEBarcode.Scanner.csproj -f net10.0-android --configuration Release
+
+  ios:
+    name: iOS build
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install MAUI workload
+        run: dotnet workload install maui
+
+      # Simulator build, so no signing material is needed. A device archive build uses the
+      # usual Apple signing secrets (certificate, provisioning profile) instead.
+      - name: Build
+        run: dotnet build src/IBEBarcode.Scanner/IBEBarcode.Scanner.csproj -f net10.0-ios --configuration Release -p:RuntimeIdentifier=iossimulator-arm64

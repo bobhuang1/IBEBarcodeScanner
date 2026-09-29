@@ -1,0 +1,4 @@
+/* Localized Info.plist strings. Keys must match the Info.plist entries. */
+"NSCameraUsageDescription" = "IBE 条码扫描器使用相机读取条码、二维码和标签。";
+"NSPhotoLibraryUsageDescription" = "IBE 条码扫描器可以从您选择的照片中读取条码。";
+"NFCReaderUsageDescription" = "IBE 条码扫描器会在您请求时读取 NFC 标签并显示其中的文本或链接。";

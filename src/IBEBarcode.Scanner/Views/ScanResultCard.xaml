@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    x:Class="IBEBarcode.Scanner.Views.ScanResultCard"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:IBEBarcode.Scanner.ViewModels">
+
+    <ContentView.Resources>
+        <Style x:Key="FieldLabel" TargetType="Label">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="TextColor" Value="{AppThemeBinding Light=#57606A, Dark=#9BA3AD}" />
+        </Style>
+        <Style x:Key="FieldValue" TargetType="Label">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="LineBreakMode" Value="CharacterWrap" />
+        </Style>
+        <Style x:Key="FieldHint" TargetType="Label">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="TextColor" Value="{AppThemeBinding Light=#57606A, Dark=#9BA3AD}" />
+        </Style>
+        <!-- A link the payload carried: it opens in the browser, and it looks like something that does. -->
+        <Style x:Key="FieldLink" TargetType="Label">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="LineBreakMode" Value="CharacterWrap" />
+            <Setter Property="TextColor" Value="{AppThemeBinding Light=#0969DA, Dark=#6CB6FF}" />
+            <Setter Property="TextDecorations" Value="Underline" />
+        </Style>
+        <!-- What the card can do with the value. Every one of them opens something, so they are links. -->
+        <Style x:Key="FieldAction" TargetType="Label">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Padding" Value="0,4" />
+            <Setter Property="TextColor" Value="{AppThemeBinding Light=#0969DA, Dark=#6CB6FF}" />
+            <Setter Property="TextDecorations" Value="Underline" />
+        </Style>
+    </ContentView.Resources>
+
+    <Border
+        Margin="0,6"
+        Padding="14"
+        BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#1F2328}"
+        Stroke="{AppThemeBinding Light=#D0D7DE, Dark=#3A3F45}"
+        StrokeShape="RoundRectangle 12">
+
+        <VerticalStackLayout Spacing="10">
+
+            <VerticalStackLayout Spacing="2">
+                <Label Style="{StaticResource FieldLabel}" Text="{Binding SymbologyLabel}" />
+                <Label FontAttributes="Bold" FontSize="17" Text="{Binding SymbologyValue}" />
+            </VerticalStackLayout>
+
+            <!--
+                The scanned value. Tapping it searches the web for it, which is what someone does with a
+                product code, a part number or a serial. The hint is there because plain text does not
+                look tappable on its own.
+            -->
+            <VerticalStackLayout Spacing="2">
+                <Label Style="{StaticResource FieldLabel}" Text="{Binding ValueLabel}" />
+                <Label Style="{StaticResource FieldValue}" Text="{Binding Value}">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding SearchCommand}" />
+                    </Label.GestureRecognizers>
+                </Label>
+                <Label Style="{StaticResource FieldHint}" Text="{Binding SearchHint}" />
+            </VerticalStackLayout>
+
+            <!--
+                Directly under the value, where the user looks first: the link the payload carries, if it
+                carries one. Only http/https ever reaches this row - the payload classifier decides.
+            -->
+            <VerticalStackLayout IsVisible="{Binding HasLink}" Spacing="2">
+                <Label Style="{StaticResource FieldLabel}" Text="{Binding LinkLabel}" />
+                <Label Style="{StaticResource FieldLink}" Text="{Binding LinkText}">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding OpenLinkCommand}" />
+                    </Label.GestureRecognizers>
+                </Label>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout IsVisible="{Binding HasRawValue}" Spacing="2">
+                <Label Style="{StaticResource FieldLabel}" Text="{Binding RawValueLabel}" />
+                <Label Style="{StaticResource FieldValue}" Text="{Binding RawValue}" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout IsVisible="{Binding HasGs1}" Spacing="4">
+                <Label Style="{StaticResource FieldLabel}" Text="{Binding Gs1Title}" />
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding Gs1Lines}" Spacing="2">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="x:String">
+                            <Label Style="{StaticResource FieldValue}" Text="{Binding}" />
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout IsVisible="{Binding HasIsbn13}" Spacing="2">
+                <Label Style="{StaticResource FieldLabel}" Text="{Binding Isbn13Label}" />
+                <Label Style="{StaticResource FieldValue}" Text="{Binding Isbn13Value}" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout IsVisible="{Binding HasIsbn10}" Spacing="2">
+                <Label Style="{StaticResource FieldLabel}" Text="{Binding Isbn10Label}" />
+                <Label Style="{StaticResource FieldValue}" Text="{Binding Isbn10Value}" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout IsVisible="{Binding HasExpandedText}" Spacing="2">
+                <Label Style="{StaticResource FieldLabel}" Text="{Binding ExpandedLabel}" />
+                <Label Style="{StaticResource FieldValue}" Text="{Binding ExpandedValue}" />
+            </VerticalStackLayout>
+
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" RowDefinitions="Auto,Auto" RowSpacing="2">
+                <Label Grid.Row="0" Grid.Column="0" Style="{StaticResource FieldLabel}" Text="{Binding KindLabel}" />
+                <Label Grid.Row="0" Grid.Column="1" Style="{StaticResource FieldValue}" Text="{Binding KindValue}" />
+                <Label Grid.Row="1" Grid.Column="0" Style="{StaticResource FieldLabel}" Text="{Binding SourceLabel}" />
+                <Label Grid.Row="1" Grid.Column="1" Style="{StaticResource FieldValue}" Text="{Binding SourceValue}" />
+            </Grid>
+
+            <Label
+                FontSize="12"
+                Text="{Binding ScannedAtValue}"
+                TextColor="{AppThemeBinding Light=#57606A, Dark=#9BA3AD}" />
+
+            <Label
+                FontSize="12"
+                IsVisible="{Binding HasCheckDigitNote}"
+                Text="{Binding CheckDigitNote}"
+                TextColor="{AppThemeBinding Light=#9A6700, Dark=#D4A72C}" />
+
+            <!--
+                The things anyone wants after a scan, offered as links instead of buttons: search the value on
+                the web, open the link the payload carried (that one only exists when it carried one), copy the
+                value, or share it. The row wraps, because "Search Google" next to a link is already wide on a
+                360 dp phone, and wider in Japanese and Chinese.
+            -->
+            <FlexLayout
+                AlignItems="Center"
+                Direction="Row"
+                JustifyContent="Start"
+                Wrap="Wrap">
+                <Label Margin="0,0,20,0" Style="{StaticResource FieldAction}" Text="{Binding SearchActionText}">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding SearchCommand}" />
+                    </Label.GestureRecognizers>
+                </Label>
+                <Label
+                    Margin="0,0,20,0"
+                    IsVisible="{Binding HasLink}"
+                    Style="{StaticResource FieldAction}"
+                    Text="{Binding OpenLinkActionText}">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding OpenLinkCommand}" />
+                    </Label.GestureRecognizers>
+                </Label>
+                <Label Margin="0,0,20,0" Style="{StaticResource FieldAction}" Text="{Binding CopyActionText}">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding CopyCommand}" />
+                    </Label.GestureRecognizers>
+                </Label>
+                <Label Style="{StaticResource FieldAction}" Text="{Binding ShareActionText}">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ShareCommand}" />
+                    </Label.GestureRecognizers>
+                </Label>
+            </FlexLayout>
+
+            <!--
+                Anything else the same picture held. One press can hold several labels, and a book label
+                usually carries two codes, so each of them is shown with its own value and its own links rather
+                than being silently dropped.
+            -->
+            <VerticalStackLayout IsVisible="{Binding HasAlsoFound}" Spacing="8">
+                <BoxView HeightRequest="1" Color="{AppThemeBinding Light=#D0D7DE, Dark=#3A3F45}" />
+                <Label Style="{StaticResource FieldLabel}" Text="{Binding AlsoFoundTitle}" />
+
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding AlsoFound}" Spacing="10">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="vm:ScanResultViewModel">
+                            <VerticalStackLayout Spacing="2">
+                                <Label FontAttributes="Bold" FontSize="13" Text="{Binding SymbologyValue}" />
+                                <Label Style="{StaticResource FieldValue}" Text="{Binding Value}" />
+                                <FlexLayout
+                                    AlignItems="Center"
+                                    Direction="Row"
+                                    JustifyContent="Start"
+                                    Wrap="Wrap">
+                                    <Label
+                                        Margin="0,0,20,0"
+                                        Style="{StaticResource FieldAction}"
+                                        Text="{Binding SearchActionText}">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding SearchCommand}" />
+                                        </Label.GestureRecognizers>
+                                    </Label>
+                                    <Label
+                                        Margin="0,0,20,0"
+                                        IsVisible="{Binding HasLink}"
+                                        Style="{StaticResource FieldAction}"
+                                        Text="{Binding OpenLinkActionText}">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding OpenLinkCommand}" />
+                                        </Label.GestureRecognizers>
+                                    </Label>
+                                    <Label Style="{StaticResource FieldAction}" Text="{Binding CopyActionText}">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding CopyCommand}" />
+                                        </Label.GestureRecognizers>
+                                    </Label>
+                                </FlexLayout>
+                            </VerticalStackLayout>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+    </Border>
+</ContentView>

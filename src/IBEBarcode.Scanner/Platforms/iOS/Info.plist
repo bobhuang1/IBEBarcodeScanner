@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>UIDeviceFamily</key>
+	<array>
+		<integer>1</integer>
+		<integer>2</integer>
+	</array>
+	<key>UIRequiredDeviceCapabilities</key>
+	<array>
+		<string>arm64</string>
+	</array>
+	<!-- Portrait only, on both phone and tablet: the scan preview and the result panel are laid out for a
+	     tall screen. Android is locked the same way on MainActivity. -->
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+	</array>
+	<key>XSAppIconAssets</key>
+	<string>Assets.xcassets/appicon.appiconset</string>
+
+	<!-- Camera scanning. -->
+	<key>NSCameraUsageDescription</key>
+	<string>IBE Barcode Scanner uses the camera to read barcodes, QR codes and labels.</string>
+	<!-- Scanning a barcode from a photo the user picks. -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>IBE Barcode Scanner can read a barcode from a photo you choose.</string>
+	<!-- Present now so the phase-2 CoreNFC work does not need a plist change; the entitlement is what
+	     actually unlocks reading, and the app reports "not supported" until that exists. -->
+	<key>NFCReaderUsageDescription</key>
+	<string>IBE Barcode Scanner reads NFC tags on request to show their text or link.</string>
+
+	<!-- Localization. iOS only resolves locales that are declared here, so without this list the app
+	     would silently fall back to English; CFBundleDevelopmentRegion is the fallback culture. -->
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>zh-Hans</string>
+		<string>zh-Hant</string>
+		<string>ja</string>
+	</array>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+</dict>
+</plist>

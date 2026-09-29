@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+	<application android:allowBackup="true" android:icon="@mipmap/appicon" android:label="@string/app_name" android:roundIcon="@mipmap/appicon_round" android:supportsRtl="true"></application>
+
+	<!-- Camera scanning (Google ML Kit barcode scanning). -->
+	<uses-permission android:name="android.permission.CAMERA" />
+	<!-- Haptic confirmation of a successful scan. -->
+	<uses-permission android:name="android.permission.VIBRATE" />
+	<!-- NFC tag reading. -->
+	<uses-permission android:name="android.permission.NFC" />
+
+	<!-- Optional on purpose: printed barcodes are scanned on devices without NFC hardware,
+	     and a device without a camera can still read NFC tags. -->
+	<uses-feature android:name="android.hardware.nfc" android:required="false" />
+	<uses-feature android:name="android.hardware.camera" android:required="false" />
+	<uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
+</manifest>

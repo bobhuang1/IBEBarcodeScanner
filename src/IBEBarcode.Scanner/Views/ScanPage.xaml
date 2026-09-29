@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="IBEBarcode.Scanner.Views.ScanPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:scanner="clr-namespace:BarcodeScanning;assembly=BarcodeScanning.Native.Maui"
+    xmlns:views="clr-namespace:IBEBarcode.Scanner.Views"
+    Title="Scan">
+
+    <Grid RowDefinitions="*,Auto">
+
+        <Grid Grid.Row="0">
+
+            <scanner:CameraView
+                x:Name="Camera"
+                AimMode="True"
+                BarcodeSymbologies="{Binding Symbologies}"
+                CameraFacing="{Binding CameraFacing}"
+                CaptureQuality="High"
+                ForceFrameCapture="{Binding ForceFrameCapture}"
+                PauseScanning="{Binding PauseScanning}"
+                TorchOn="{Binding TorchOn}"
+                VibrationOnDetected="False"
+                CameraEnabled="{Binding CameraEnabled}" />
+
+            <VerticalStackLayout
+                Margin="12"
+                Spacing="10"
+                VerticalOptions="End">
+
+                <!--
+                    One status line for everything the app has to say: what to do next, what it is doing, and -
+                    briefly, in a different colour - that a press found nothing.
+                -->
+                <Label
+                    BackgroundColor="#99000000"
+                    HorizontalTextAlignment="Center"
+                    Padding="10,6"
+                    Text="{Binding StatusMessage}"
+                    TextColor="White">
+                    <Label.Triggers>
+                        <DataTrigger
+                            Binding="{Binding StatusIsWarning}"
+                            TargetType="Label"
+                            Value="True">
+                            <Setter Property="BackgroundColor" Value="#E6B3261E" />
+                        </DataTrigger>
+                    </Label.Triggers>
+                </Label>
+
+                <!--
+                    The Scan button sits in the middle of the row, sized to whatever the two side buttons leave
+                    (they take their natural width, so nothing is ever truncated in a longer language), and a
+                    head taller than them. "Scan a photo" gets its own full-width row underneath: four buttons
+                    across a 360dp-wide phone used to push it off the right edge where it could not be tapped.
+                -->
+                <Grid
+                    ColumnDefinitions="Auto,*,Auto"
+                    ColumnSpacing="8"
+                    RowDefinitions="Auto,Auto"
+                    RowSpacing="8">
+                    <Button
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        Command="{Binding ToggleTorchCommand}"
+                        Text="{Binding TorchButtonText}"
+                        VerticalOptions="Center" />
+
+                    <!--
+                        The primary control: one press takes one picture and tries to read it. Nothing is
+                        decoded while it is not being pressed, so the phone is never held warm between scans.
+                    -->
+                    <Button
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        BackgroundColor="#512BD4"
+                        Command="{Binding ScanCommand}"
+                        CornerRadius="36"
+                        FontAttributes="Bold"
+                        FontSize="22"
+                        HeightRequest="72"
+                        IsEnabled="{Binding CanScan}"
+                        Text="{Binding ScanButtonText}"
+                        TextColor="White" />
+
+                    <Button
+                        Grid.Row="0"
+                        Grid.Column="2"
+                        Command="{Binding SwitchCameraCommand}"
+                        Text="{Binding SwitchCameraButtonText}"
+                        VerticalOptions="Center" />
+
+                    <Button
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        Grid.ColumnSpan="3"
+                        Command="{Binding ScanPhotoCommand}"
+                        Text="{Binding ScanPhotoButtonText}" />
+                </Grid>
+
+            </VerticalStackLayout>
+        </Grid>
+
+        <!--
+            Capped so a long result can never squeeze the preview, and with it the Scan button, off a small
+            phone's screen; the panel scrolls instead.
+        -->
+        <ScrollView
+            Grid.Row="1"
+            MaximumHeightRequest="240"
+            Padding="14,8">
+
+            <VerticalStackLayout Spacing="6">
+
+                <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding HasResult}">
+                    <Label
+                        Grid.Column="0"
+                        FontAttributes="Bold"
+                        FontSize="15"
+                        Text="{Binding ResultTitle}"
+                        VerticalOptions="Center" />
+                    <Button
+                        Grid.Column="1"
+                        Command="{Binding ClearResultCommand}"
+                        Text="{Binding ClearResultButtonText}" />
+                </Grid>
+
+                <Grid IsVisible="{Binding HasResult}">
+                    <views:ScanResultCard BindingContext="{Binding CurrentResult}" />
+                </Grid>
+
+                <Label
+                    FontSize="13"
+                    IsVisible="{Binding HasNoResult}"
+                    Text="{Binding ResultNoneText}"
+                    TextColor="{AppThemeBinding Light=#57606A, Dark=#9BA3AD}" />
+
+                <Label
+                    FontSize="12"
+                    Text="{Binding CapturedFrameHintText}"
+                    TextColor="{AppThemeBinding Light=#57606A, Dark=#9BA3AD}" />
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+    </Grid>
+</ContentPage>

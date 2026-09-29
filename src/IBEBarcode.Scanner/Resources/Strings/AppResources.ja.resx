@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <data name="AppTitle" xml:space="preserve"><value>IBE バーコードスキャナー</value></data>
+  <data name="ScanTabTitle" xml:space="preserve"><value>スキャン</value></data>
+  <data name="NfcTabTitle" xml:space="preserve"><value>NFC</value></data>
+  <data name="HistoryTabTitle" xml:space="preserve"><value>履歴</value></data>
+  <data name="AboutTabTitle" xml:space="preserve"><value>このアプリについて</value></data>
+
+  <data name="ScanHint" xml:space="preserve"><value>カメラをバーコードまたは QR コードに向けてください。</value></data>
+  <data name="ScanReading" xml:space="preserve"><value>バーコードを読み取っています…</value></data>
+  <data name="CameraStarting" xml:space="preserve"><value>カメラを起動しています…</value></data>
+  <data name="ScanIdleHint" xml:space="preserve"><value>「スキャン」をタップしてバーコードを読み取ります。</value></data>
+  <data name="ScanStartButton" xml:space="preserve"><value>スキャン</value></data>
+  <data name="ScanNotFound" xml:space="preserve"><value>バーコードが見つかりませんでした。ラベルを静止させて、もう一度お試しください。</value></data>
+  <data name="TorchOn" xml:space="preserve"><value>ライト点灯</value></data>
+  <data name="TorchOff" xml:space="preserve"><value>ライト消灯</value></data>
+  <data name="SwitchCameraButton" xml:space="preserve"><value>カメラを切り替え</value></data>
+  <data name="CapturedFrameHint" xml:space="preserve"><value>MSI Plessey と USPS Postnet は取り込んだ画像から読み取ります。ラベルを静止させ、画面いっぱいに写してください。</value></data>
+  <data name="CapturedFrameFound" xml:space="preserve"><value>取り込んだ画像から読み取りました。</value></data>
+  <data name="ScanFromPhotoButton" xml:space="preserve"><value>写真をスキャン</value></data>
+  <data name="PhotoScanNotFound" xml:space="preserve"><value>その写真からはデコードできませんでした。</value></data>
+  <data name="PhotoScanFailed" xml:space="preserve"><value>写真を開けませんでした。</value></data>
+  <data name="CameraPermissionTitle" xml:space="preserve"><value>カメラへのアクセスが必要です</value></data>
+  <data name="CameraPermissionMessage" xml:space="preserve"><value>バーコードを読み取るにはカメラが必要です。システム設定で許可してください。</value></data>
+  <data name="OpenSettingsButton" xml:space="preserve"><value>設定を開く</value></data>
+  <data name="CameraUnavailable" xml:space="preserve"><value>この端末ではカメラを利用できません。</value></data>
+
+  <data name="ResultTitle" xml:space="preserve"><value>直近のスキャン</value></data>
+  <data name="ResultSymbology" xml:space="preserve"><value>シンボル</value></data>
+  <data name="ResultKind" xml:space="preserve"><value>種類</value></data>
+  <data name="ResultValue" xml:space="preserve"><value>値</value></data>
+  <data name="ResultRawValue" xml:space="preserve"><value>生の値</value></data>
+  <data name="ResultSource" xml:space="preserve"><value>取得元</value></data>
+  <data name="ResultScannedAt" xml:space="preserve"><value>スキャン日時</value></data>
+  <data name="ResultGs1Title" xml:space="preserve"><value>GS1 要素</value></data>
+  <data name="ResultIsbn13" xml:space="preserve"><value>ISBN-13</value></data>
+  <data name="ResultIsbn10" xml:space="preserve"><value>ISBN-10</value></data>
+  <data name="ResultExpandedUpcA" xml:space="preserve"><value>対応する UPC-A</value></data>
+  <data name="ResultCheckDigitValid" xml:space="preserve"><value>チェックデジット検証済み</value></data>
+  <data name="ResultCheckDigitUnverified" xml:space="preserve"><value>チェックデジット未検証 — 使用前に値を確認してください。</value></data>
+  <data name="ResultNone" xml:space="preserve"><value>まだ何もスキャンしていません。</value></data>
+  <data name="ResultLink" xml:space="preserve"><value>リンク</value></data>
+  <data name="ResultSearchHint" xml:space="preserve"><value>タップしてウェブで検索</value></data>
+  <data name="ResultAlsoFound" xml:space="preserve"><value>同じ画像内の他のコード</value></data>
+  <data name="ResultSearchAction" xml:space="preserve"><value>Google で検索</value></data>
+  <data name="ResultOpenLinkAction" xml:space="preserve"><value>リンクを開く</value></data>
+  <data name="ResultCopyAction" xml:space="preserve"><value>コピー</value></data>
+  <data name="ResultShareAction" xml:space="preserve"><value>共有</value></data>
+  <data name="CopiedMessage" xml:space="preserve"><value>クリップボードにコピーしました。</value></data>
+  <data name="LinkOpenFailed" xml:space="preserve"><value>開けるブラウザーがありません。</value></data>
+
+  <data name="HistoryTitle" xml:space="preserve"><value>今回のセッション</value></data>
+  <data name="HistoryEmpty" xml:space="preserve"><value>スキャンした内容がここに表示されます。アプリを終了すると保存されません。</value></data>
+  <data name="HistoryCount" xml:space="preserve"><value>{0} 件のスキャン</value></data>
+  <data name="ClearResultButton" xml:space="preserve"><value>クリア</value></data>
+  <data name="ClearHistoryButton" xml:space="preserve"><value>履歴を消去</value></data>
+  <data name="NoDatabaseNote" xml:space="preserve"><value>データベースもアカウントも不要。データは端末内に留まります。</value></data>
+
+  <data name="NfcTitle" xml:space="preserve"><value>NFC タグ</value></data>
+  <data name="NfcStartButton" xml:space="preserve"><value>NFC スキャン開始</value></data>
+  <data name="NfcStopButton" xml:space="preserve"><value>NFC スキャン停止</value></data>
+  <data name="NfcWaiting" xml:space="preserve"><value>端末の上部をタグに近づけてください…</value></data>
+  <data name="NfcIdle" xml:space="preserve"><value>スキャンを開始してからタグにタッチしてください。</value></data>
+  <data name="NfcNotSupportedAndroid" xml:space="preserve"><value>この端末には NFC ハードウェアがありません。</value></data>
+  <data name="NfcNotSupportedIos" xml:space="preserve"><value>iPhone での NFC タグ読み取りには Apple Developer の NFC エンタイトルメントが必要で、今後のバージョンで対応予定です。カメラでのスキャンは通常どおり動作します。</value></data>
+  <data name="NfcDisabled" xml:space="preserve"><value>NFC がオフです。システム設定で有効にしてからスキャンしてください。</value></data>
+  <data name="NfcEmptyTag" xml:space="preserve"><value>タグは読み取れましたが、テキストやリンクが含まれていません。</value></data>
+  <data name="NfcReadError" xml:space="preserve"><value>タグを読み取れませんでした。もう一度お試しください。</value></data>
+
+  <data name="AboutTitle" xml:space="preserve"><value>IBE バーコードスキャナー</value></data>
+  <data name="AboutDescription" xml:space="preserve"><value>バーコード、QR コード、NFC タグに対応した無料のオープンソーススキャナーです。IBE Barcode Generator が印刷するすべての形式を読み取り、データベースは不要で、端末外にデータを送信しません。</value></data>
+  <data name="AboutVersion" xml:space="preserve"><value>バージョン</value></data>
+  <data name="AboutLicense" xml:space="preserve"><value>ライセンス</value></data>
+  <data name="AboutLicenseValue" xml:space="preserve"><value>MIT</value></data>
+  <data name="AboutCoverage" xml:space="preserve"><value>対応フォーマット</value></data>
+  <data name="AboutCoverageText" xml:space="preserve"><value>カメラ: Codabar、Code 39 と拡張 Code 39、Code 93、Code 128、GS1-128、ITF、EAN-8、EAN-13、UPC-A、UPC-E、UPC サプリメント、ISBN、QR コード、Data Matrix、PDF417、Aztec、および取り込んだ画像から読み取る MSI Plessey と USPS Postnet。
+NFC: リンク、テキスト、メールアドレス、電話番号、WiFi 情報を含む NDEF タグ。</value></data>
+  <data name="AboutLimitations" xml:space="preserve"><value>既知の制限</value></data>
+  <data name="AboutLimitationsText" xml:space="preserve"><value>iPhone での NFC 読み取りには Apple Developer のエンタイトルメントが必要で、本バージョンには含まれていません。MSI Plessey と USPS Postnet は取り込んだフレームからデコードするため、遠くからではなく、平らで明るいラベルが必要です。Android のスキャンは Google ML Kit を使用するため Google Play 開発者サービスが必要です。</value></data>
+  <data name="AboutCompanion" xml:space="preserve"><value>IBE Barcode Generator のコンパニオンアプリです。印刷フォーマットは同アプリで検証しています。</value></data>
+
+  <data name="HelpTitle" xml:space="preserve"><value>使い方</value></data>
+  <data name="HelpScanTitle" xml:space="preserve"><value>バーコードをスキャンする</value></data>
+  <data name="HelpScanText" xml:space="preserve"><value>ラベルにカメラを向けて「スキャン」をタップします。カメラに写っているものを撮影して読み取ります。タップするまで読み取りは行われません。読み取れない場合は警告が自動的に消えるので、もう一度「スキャン」をタップしてください。</value></data>
+  <data name="HelpPhotoTitle" xml:space="preserve"><value>写真から読み取る</value></data>
+  <data name="HelpPhotoText" xml:space="preserve"><value>「写真をスキャン」をタップすると、端末に保存されている画像からコードを読み取ります。撮影しておいたラベルや、手で安定して持てないラベルに便利です。</value></data>
+  <data name="HelpResultTitle" xml:space="preserve"><value>結果の使い方</value></data>
+  <data name="HelpResultText" xml:space="preserve"><value>結果には値とその形式が表示されます。値をタップするとウェブで検索します。コードにリンクが含まれている場合は値の下に表示され、タップするとブラウザーで開きます。「コピー」と「共有」で値を渡せます。</value></data>
+  <data name="HelpNfcTitle" xml:space="preserve"><value>NFC タグを読み取る</value></data>
+  <data name="HelpNfcText" xml:space="preserve"><value>「NFC」タブで「NFC スキャン開始」をタップし、読み取られるまで端末の上部をタグに近づけたままにします。タグを端末にかざしてアプリを直接開くこともできます。</value></data>
+  <data name="HelpTipsTitle" xml:space="preserve"><value>ヒント</value></data>
+  <data name="HelpTipsText" xml:space="preserve"><value>「ライト」ボタンで暗いラベルのライトを点灯し、「カメラを切り替え」ボタンで背面と前面のカメラを切り替えます。読み取った内容はアプリを閉じるまで「履歴」に残り、この端末内にとどまります。</value></data>
+
+  <data name="LanguageTitle" xml:space="preserve"><value>言語</value></data>
+  <data name="LanguageSystem" xml:space="preserve"><value>端末に合わせる</value></data>
+  <data name="LanguageEnglish" xml:space="preserve"><value>English</value></data>
+  <data name="LanguageChineseSimplified" xml:space="preserve"><value>简体中文</value></data>
+  <data name="LanguageChineseTraditional" xml:space="preserve"><value>繁體中文</value></data>
+  <data name="LanguageJapanese" xml:space="preserve"><value>日本語</value></data>
+
+  <data name="KindText" xml:space="preserve"><value>テキスト</value></data>
+  <data name="KindUrl" xml:space="preserve"><value>リンク</value></data>
+  <data name="KindEmail" xml:space="preserve"><value>メールアドレス</value></data>
+  <data name="KindPhone" xml:space="preserve"><value>電話番号</value></data>
+  <data name="KindSms" xml:space="preserve"><value>SMS</value></data>
+  <data name="KindWifi" xml:space="preserve"><value>WiFi 情報</value></data>
+  <data name="KindContact" xml:space="preserve"><value>連絡先</value></data>
+  <data name="KindGeographicCoordinates" xml:space="preserve"><value>位置情報</value></data>
+  <data name="KindCalendarEvent" xml:space="preserve"><value>カレンダー予定</value></data>
+  <data name="KindGs1" xml:space="preserve"><value>GS1 データ</value></data>
+  <data name="KindProduct" xml:space="preserve"><value>商品コード</value></data>
+
+  <data name="SourceCamera" xml:space="preserve"><value>カメラ</value></data>
+  <data name="SourceNfc" xml:space="preserve"><value>NFC タグ</value></data>
+  <data name="SourceImageFile" xml:space="preserve"><value>写真</value></data>
+
+  <data name="OkButton" xml:space="preserve"><value>OK</value></data>
+  <data name="ErrorTitle" xml:space="preserve"><value>問題が発生しました</value></data>
+</root>

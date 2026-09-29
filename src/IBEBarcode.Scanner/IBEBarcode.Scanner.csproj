@@ -1,0 +1,107 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<!-- Mobile only: iOS and Android, as the requirements specify. -->
+		<TargetFrameworks>net10.0-android;net10.0-ios</TargetFrameworks>
+
+		<OutputType>Exe</OutputType>
+		<RootNamespace>IBEBarcode.Scanner</RootNamespace>
+		<UseMaui>true</UseMaui>
+		<SingleProject>true</SingleProject>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+
+		<!-- Resources for the neutral language are used whenever a culture has no resource file. -->
+		<NeutralLanguage>en</NeutralLanguage>
+
+		<MauiXamlInflator>SourceGen</MauiXamlInflator>
+
+		<!-- Display name -->
+		<ApplicationTitle>IBE Barcode Scanner</ApplicationTitle>
+
+		<!-- App Identifier -->
+		<ApplicationId>net.ibegroup.ibebarcodescanner</ApplicationId>
+
+		<!-- Versions -->
+		<ApplicationDisplayVersion>1.0.0</ApplicationDisplayVersion>
+		<ApplicationVersion>1</ApplicationVersion>
+
+		<!-- Matches the minimums BarcodeScanning.Native.Maui declares. -->
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.1</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</SupportedOSPlatformVersion>
+
+		<!--
+			.NET for Android only builds android-arm64 and android-x64 unless told otherwise
+			(Microsoft.Android.Sdk.DefaultProperties.targets defaults RuntimeIdentifiers to
+			"android-arm64;android-x64"). 32-bit ARM is left out, and 32-bit-only handsets are still
+			common in the rugged-device category this app is aimed at. BarcodeScanning.Native.Maui ships
+			armeabi-v7a binaries, so android-arm is a working ABI: without it, deploy fails with
+			ADB0020 "The package does not support the CPU architecture of this device".
+		-->
+		<RuntimeIdentifiers Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">android-arm;android-arm64;android-x64</RuntimeIdentifiers>
+
+		<!--
+			Fast deployment (the default in Debug) leaves the assemblies out of the APK and pushes them to
+			/data/data/<app>/files/.__override__ after installing. That push does not reliably include
+			assemblies coming from a ProjectReference: on the Android 12 / armeabi-v7a test device
+			IBEBarcode.Scanner.Core.dll was never uploaded, and the app died on startup with
+				TypeLoadException: Could not load file or assembly 'IBEBarcode.Scanner.Core'
+			Embedding the assemblies makes the APK self-contained, so a plain `adb install` is enough and
+			there is nothing to desynchronise. The only cost is a slower copy on each deploy.
+		-->
+		<EmbedAssembliesIntoApk Condition="'$(Configuration)' == 'Debug' And $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">true</EmbedAssembliesIntoApk>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<!--
+			App icon: the IBE Group mark, generated from the web site's images/logosmall.jpg (which is also the
+			logo shown on the About tab, copied in as Resources/Images/ibegroup_logo.jpg). The site's original
+			favicon.ico is kept beside the generated layers for reference; nothing in the build reads it.
+			appiconfg.png is the mark inset into the central 66% of the canvas, because that is all of an
+			Android adaptive icon that the launcher's mask keeps; appicon.png is the background layer. The
+			background is white rather than the brand blue because the mark's globe is #0B6091, close enough
+			to #0B4F8A to disappear against it, and because the logo is drawn for a white page.
+		-->
+		<MauiIcon Include="Resources\AppIcon\appicon.png" ForegroundFile="Resources\AppIcon\appiconfg.png" Color="#FFFFFF" />
+
+		<!-- Splash Screen: the same mark, on the white it was drawn for. -->
+		<MauiSplashScreen Include="Resources\Splash\splash.png" Color="#FFFFFF" BaseSize="192,192" />
+
+		<!-- Images -->
+		<MauiImage Include="Resources\Images\*" />
+
+		<!-- Custom Fonts -->
+		<MauiFont Include="Resources\Fonts\*" />
+
+		<!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
+		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="BarcodeScanning.Native.Maui" Version="3.1.0" />
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\IBEBarcode.Scanner.Core\IBEBarcode.Scanner.Core.csproj" />
+	</ItemGroup>
+
+	<!--
+		Strongly-typed access to the localized strings. This is the documented .NET MAUI 10 setup for
+		building outside Visual Studio: the designer-generated class does not exist in a CLI build, so the
+		resx file is compiled and the accessor generated as part of the build.
+	-->
+	<ItemGroup>
+		<EmbeddedResource Update="Resources\Strings\AppResources.resx">
+			<Generator>MSBuild:Compile</Generator>
+			<StronglyTypedLanguage>CSharp</StronglyTypedLanguage>
+			<StronglyTypedNamespace>IBEBarcode.Scanner.Resources.Strings</StronglyTypedNamespace>
+			<StronglyTypedFileName>$(IntermediateOutputPath)AppResources.Designer.cs</StronglyTypedFileName>
+			<StronglyTypedClassName>AppResources</StronglyTypedClassName>
+		</EmbeddedResource>
+
+	</ItemGroup>
+
+</Project>

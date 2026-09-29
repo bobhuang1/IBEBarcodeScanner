@@ -1,0 +1,17 @@
+This is a new project that will reside in:
+C:\GitHub\IBEGroup\IBEBarcodeScanner
+
+It works together with C:\GitHub\IBEGroup\IBEBarcodeGeneratror
+
+Name "IBE Barcode Scanner", allows user to scan different kinds of barcodes, it should be able to scan barcodes created by IBEBarcodeGenerator:
+1. Standard printed barcodes including QR codes using camera on IOS and Android phones
+2. NFC codes, IF the IOS or Android phone supports it
+
+Other requirements:
+1. This app should run on IOS or Android phones/pads. Use C# .NET 10, and please recommend coding framework
+2. Scanned barcode should be displayed on the screen, if it's a QR code or NFC code that contains a link, give the user the option to open the link in the default browser.
+3. We should not need any database connection
+4. Should support localization, initially we need to support English, simplified Chinese and traditional Chinese, Japanese
+5. MIT license
+
+Plan first, ask me if not clear.

@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/IBEBarcode.Scanner/IBEBarcode.Scanner.csproj" />
+    <Project Path="src/IBEBarcode.Scanner.Core/IBEBarcode.Scanner.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/IBEBarcode.Scanner.Core.Tests/IBEBarcode.Scanner.Core.Tests.csproj" />
+  </Folder>
+</Solution>

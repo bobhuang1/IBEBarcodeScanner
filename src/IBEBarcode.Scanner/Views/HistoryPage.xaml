@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="IBEBarcode.Scanner.Views.HistoryPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:views="clr-namespace:IBEBarcode.Scanner.Views"
+    xmlns:vm="clr-namespace:IBEBarcode.Scanner.ViewModels"
+    Title="History">
+
+    <Grid Padding="16" RowDefinitions="Auto,*">
+        <VerticalStackLayout Grid.Row="0" Spacing="6">
+
+            <Label FontAttributes="Bold" FontSize="20" Text="{Binding Title}" />
+
+            <Grid ColumnDefinitions="*,Auto">
+                <Label
+                    Grid.Column="0"
+                    FontSize="13"
+                    Text="{Binding CountText}"
+                    VerticalOptions="Center" />
+                <Button
+                    Grid.Column="1"
+                    Command="{Binding ClearCommand}"
+                    IsVisible="{Binding HasItems}"
+                    Text="{Binding ClearButtonText}" />
+            </Grid>
+
+            <Label
+                FontSize="12"
+                Text="{Binding NoDatabaseNote}"
+                TextColor="{AppThemeBinding Light=#57606A, Dark=#9BA3AD}" />
+
+        </VerticalStackLayout>
+
+        <CollectionView
+            Grid.Row="1"
+            ItemsSource="{Binding Items}"
+            SelectionMode="None">
+            <CollectionView.EmptyView>
+                <Label
+                    Margin="0,24,0,0"
+                    FontSize="14"
+                    Text="{Binding EmptyText}"
+                    TextColor="{AppThemeBinding Light=#57606A, Dark=#9BA3AD}" />
+            </CollectionView.EmptyView>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="vm:ScanResultViewModel">
+                    <views:ScanResultCard />
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</ContentPage>

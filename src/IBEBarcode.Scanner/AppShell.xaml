@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="IBEBarcode.Scanner.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:views="clr-namespace:IBEBarcode.Scanner.Views"
+    Title="IBE Barcode Scanner">
+
+    <TabBar>
+        <ShellContent
+            x:Name="ScanTab"
+            Route="scan"
+            ContentTemplate="{DataTemplate views:ScanPage}" />
+        <ShellContent
+            x:Name="NfcTab"
+            Route="nfc"
+            ContentTemplate="{DataTemplate views:NfcPage}" />
+        <ShellContent
+            x:Name="HistoryTab"
+            Route="history"
+            ContentTemplate="{DataTemplate views:HistoryPage}" />
+        <ShellContent
+            x:Name="AboutTab"
+            Route="about"
+            ContentTemplate="{DataTemplate views:AboutPage}" />
+    </TabBar>
+
+</Shell>

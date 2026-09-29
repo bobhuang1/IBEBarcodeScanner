@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <data name="AppTitle" xml:space="preserve">
+    <value>IBE Barcode Scanner</value>
+    <comment>Application name.</comment>
+  </data>
+  <data name="ScanTabTitle" xml:space="preserve">
+    <value>Scan</value>
+  </data>
+  <data name="NfcTabTitle" xml:space="preserve">
+    <value>NFC</value>
+  </data>
+  <data name="HistoryTabTitle" xml:space="preserve">
+    <value>History</value>
+  </data>
+  <data name="AboutTabTitle" xml:space="preserve">
+    <value>About</value>
+  </data>
+
+  <data name="ScanHint" xml:space="preserve">
+    <value>Point the camera at a barcode or QR code.</value>
+  </data>
+  <data name="ScanReading" xml:space="preserve">
+    <value>Reading the barcode…</value>
+  </data>
+  <data name="CameraStarting" xml:space="preserve">
+    <value>Starting camera…</value>
+  </data>
+  <data name="ScanIdleHint" xml:space="preserve">
+    <value>Tap Scan to read a barcode.</value>
+  </data>
+  <data name="ScanStartButton" xml:space="preserve">
+    <value>Scan</value>
+  </data>
+  <data name="ScanNotFound" xml:space="preserve">
+    <value>No barcode found. Hold the label steady and try again.</value>
+  </data>
+  <data name="TorchOn" xml:space="preserve">
+    <value>Light on</value>
+  </data>
+  <data name="TorchOff" xml:space="preserve">
+    <value>Light off</value>
+  </data>
+  <data name="SwitchCameraButton" xml:space="preserve">
+    <value>Switch camera</value>
+  </data>
+  <data name="CapturedFrameHint" xml:space="preserve">
+    <value>MSI Plessey and USPS Postnet are read from a captured frame — hold the label steady and fill the frame.</value>
+  </data>
+  <data name="CapturedFrameFound" xml:space="preserve">
+    <value>Read from a captured frame.</value>
+  </data>
+  <data name="ScanFromPhotoButton" xml:space="preserve">
+    <value>Scan a photo</value>
+  </data>
+  <data name="PhotoScanNotFound" xml:space="preserve">
+    <value>Nothing could be decoded from that photo.</value>
+  </data>
+  <data name="PhotoScanFailed" xml:space="preserve">
+    <value>The photo could not be opened.</value>
+  </data>
+  <data name="CameraPermissionTitle" xml:space="preserve">
+    <value>Camera access needed</value>
+  </data>
+  <data name="CameraPermissionMessage" xml:space="preserve">
+    <value>IBE Barcode Scanner needs the camera to read barcodes. You can grant access in system settings.</value>
+  </data>
+  <data name="OpenSettingsButton" xml:space="preserve">
+    <value>Open settings</value>
+  </data>
+  <data name="CameraUnavailable" xml:space="preserve">
+    <value>The camera is not available on this device.</value>
+  </data>
+
+  <data name="ResultTitle" xml:space="preserve">
+    <value>Last scan</value>
+  </data>
+  <data name="ResultSymbology" xml:space="preserve">
+    <value>Symbology</value>
+  </data>
+  <data name="ResultKind" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="ResultValue" xml:space="preserve">
+    <value>Value</value>
+  </data>
+  <data name="ResultRawValue" xml:space="preserve">
+    <value>Raw value</value>
+  </data>
+  <data name="ResultSource" xml:space="preserve">
+    <value>Source</value>
+  </data>
+  <data name="ResultScannedAt" xml:space="preserve">
+    <value>Scanned</value>
+  </data>
+  <data name="ResultGs1Title" xml:space="preserve">
+    <value>GS1 elements</value>
+  </data>
+  <data name="ResultIsbn13" xml:space="preserve">
+    <value>ISBN-13</value>
+  </data>
+  <data name="ResultIsbn10" xml:space="preserve">
+    <value>ISBN-10</value>
+  </data>
+  <data name="ResultExpandedUpcA" xml:space="preserve">
+    <value>UPC-A equivalent</value>
+  </data>
+  <data name="ResultCheckDigitValid" xml:space="preserve">
+    <value>Check digit verified</value>
+  </data>
+  <data name="ResultCheckDigitUnverified" xml:space="preserve">
+    <value>Check digit not verified — confirm the value before using it.</value>
+  </data>
+  <data name="ResultNone" xml:space="preserve">
+    <value>Nothing scanned yet.</value>
+  </data>
+  <data name="ResultLink" xml:space="preserve">
+    <value>Link</value>
+  </data>
+  <data name="ResultSearchHint" xml:space="preserve">
+    <value>Tap to search the web</value>
+  </data>
+  <data name="ResultAlsoFound" xml:space="preserve">
+    <value>Also in the picture</value>
+  </data>
+  <data name="ResultSearchAction" xml:space="preserve">
+    <value>Search Google</value>
+  </data>
+  <data name="ResultOpenLinkAction" xml:space="preserve">
+    <value>Open link</value>
+  </data>
+  <data name="ResultCopyAction" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="ResultShareAction" xml:space="preserve">
+    <value>Share</value>
+  </data>
+  <data name="CopiedMessage" xml:space="preserve">
+    <value>Copied to the clipboard.</value>
+  </data>
+  <data name="LinkOpenFailed" xml:space="preserve">
+    <value>No browser could open that.</value>
+  </data>
+
+  <data name="HistoryTitle" xml:space="preserve">
+    <value>This session</value>
+  </data>
+  <data name="HistoryEmpty" xml:space="preserve">
+    <value>Scans you make appear here. Nothing is stored after the app closes.</value>
+  </data>
+  <data name="HistoryCount" xml:space="preserve">
+    <value>{0} scan(s)</value>
+  </data>
+  <data name="ClearResultButton" xml:space="preserve"><value>Clear</value></data>
+  <data name="ClearHistoryButton" xml:space="preserve">
+    <value>Clear history</value>
+  </data>
+  <data name="NoDatabaseNote" xml:space="preserve">
+    <value>No database and no account: everything stays on this device.</value>
+  </data>
+
+  <data name="NfcTitle" xml:space="preserve">
+    <value>NFC tags</value>
+  </data>
+  <data name="NfcStartButton" xml:space="preserve">
+    <value>Start NFC scan</value>
+  </data>
+  <data name="NfcStopButton" xml:space="preserve">
+    <value>Stop NFC scan</value>
+  </data>
+  <data name="NfcWaiting" xml:space="preserve">
+    <value>Hold the top of the phone against the tag…</value>
+  </data>
+  <data name="NfcIdle" xml:space="preserve">
+    <value>Start a scan, then tap the tag.</value>
+  </data>
+  <data name="NfcNotSupportedAndroid" xml:space="preserve">
+    <value>This device has no NFC hardware.</value>
+  </data>
+  <data name="NfcNotSupportedIos" xml:space="preserve">
+    <value>Reading NFC tags on iPhone requires an Apple Developer NFC entitlement, which is planned for a later phase. Camera scanning works normally.</value>
+  </data>
+  <data name="NfcDisabled" xml:space="preserve">
+    <value>NFC is turned off. Enable it in system settings to scan tags.</value>
+  </data>
+  <data name="NfcEmptyTag" xml:space="preserve">
+    <value>The tag was read but contains no text or link.</value>
+  </data>
+  <data name="NfcReadError" xml:space="preserve">
+    <value>The tag could not be read. Try again.</value>
+  </data>
+
+  <data name="AboutTitle" xml:space="preserve">
+    <value>IBE Barcode Scanner</value>
+  </data>
+  <data name="AboutDescription" xml:space="preserve">
+    <value>Free, open-source scanner for barcodes, QR codes and NFC tags. It reads everything IBE Barcode Generator prints, needs no database, and sends nothing off the device.</value>
+  </data>
+  <data name="AboutVersion" xml:space="preserve">
+    <value>Version</value>
+  </data>
+  <data name="AboutLicense" xml:space="preserve">
+    <value>Licence</value>
+  </data>
+  <data name="AboutLicenseValue" xml:space="preserve">
+    <value>MIT</value>
+  </data>
+  <data name="AboutCoverage" xml:space="preserve">
+    <value>Supported formats</value>
+  </data>
+  <data name="AboutCoverageText" xml:space="preserve">
+    <value>Camera: Codabar, Code 39 and Extended Code 39, Code 93, Code 128, GS1-128, Interleaved 2 of 5, EAN-8, EAN-13, UPC-A, UPC-E, UPC supplements, ISBN, QR Code, Data Matrix, PDF417, Aztec, plus MSI Plessey and USPS Postnet from a captured frame.
+NFC: NDEF tags containing a link, text, email address, phone number or WiFi credentials.</value>
+  </data>
+  <data name="AboutLimitations" xml:space="preserve">
+    <value>Known limitations</value>
+  </data>
+  <data name="AboutLimitationsText" xml:space="preserve">
+    <value>NFC reading on iPhone needs an Apple Developer entitlement and is not in this version. MSI Plessey and USPS Postnet are decoded from a captured frame, so they need a steady, well-lit label rather than a long-distance scan. Android scanning uses Google ML Kit, which requires Google Play services.</value>
+  </data>
+  <data name="AboutCompanion" xml:space="preserve">
+    <value>Companion of IBE Barcode Generator. Printed formats are verified against it.</value>
+  </data>
+
+  <data name="HelpTitle" xml:space="preserve">
+    <value>How to use</value>
+  </data>
+  <data name="HelpScanTitle" xml:space="preserve">
+    <value>Scan a barcode</value>
+  </data>
+  <data name="HelpScanText" xml:space="preserve">
+    <value>Point the camera at the label and tap Scan. The app takes a picture of what the camera sees and reads it; nothing is decoded until you press. If nothing is found, the warning disappears by itself and you can tap Scan again.</value>
+  </data>
+  <data name="HelpPhotoTitle" xml:space="preserve">
+    <value>Read a barcode from a photo</value>
+  </data>
+  <data name="HelpPhotoText" xml:space="preserve">
+    <value>Tap Scan a photo to read a code from a picture already on the phone. Useful for a label that has been photographed, or one that is hard to hold steady.</value>
+  </data>
+  <data name="HelpResultTitle" xml:space="preserve">
+    <value>Using a result</value>
+  </data>
+  <data name="HelpResultText" xml:space="preserve">
+    <value>The result shows the value and its format. Tap the value to look it up on the web. If the code carries a link, the link is shown underneath: tap it to open it in the browser. Copy and Share pass the value on.</value>
+  </data>
+  <data name="HelpNfcTitle" xml:space="preserve">
+    <value>Reading an NFC tag</value>
+  </data>
+  <data name="HelpNfcText" xml:space="preserve">
+    <value>On the NFC tab, tap Start NFC scan and hold the top of the phone against the tag. A tag tapped against the phone can also open the app directly.</value>
+  </data>
+  <data name="HelpTipsTitle" xml:space="preserve">
+    <value>Tips</value>
+  </data>
+  <data name="HelpTipsText" xml:space="preserve">
+    <value>The light button turns the torch on for dark labels, and Switch camera flips between the rear and front cameras. Scans stay in History until the app closes, on this phone only, and nothing is uploaded.</value>
+  </data>
+
+  <data name="LanguageTitle" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="LanguageSystem" xml:space="preserve">
+    <value>Match device</value>
+  </data>
+  <data name="LanguageEnglish" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="LanguageChineseSimplified" xml:space="preserve">
+    <value>简体中文</value>
+  </data>
+  <data name="LanguageChineseTraditional" xml:space="preserve">
+    <value>繁體中文</value>
+  </data>
+  <data name="LanguageJapanese" xml:space="preserve">
+    <value>日本語</value>
+  </data>
+
+  <data name="KindText" xml:space="preserve">
+    <value>Text</value>
+  </data>
+  <data name="KindUrl" xml:space="preserve">
+    <value>Link</value>
+  </data>
+  <data name="KindEmail" xml:space="preserve">
+    <value>Email address</value>
+  </data>
+  <data name="KindPhone" xml:space="preserve">
+    <value>Phone number</value>
+  </data>
+  <data name="KindSms" xml:space="preserve">
+    <value>SMS</value>
+  </data>
+  <data name="KindWifi" xml:space="preserve">
+    <value>WiFi credentials</value>
+  </data>
+  <data name="KindContact" xml:space="preserve">
+    <value>Contact</value>
+  </data>
+  <data name="KindGeographicCoordinates" xml:space="preserve">
+    <value>Location</value>
+  </data>
+  <data name="KindCalendarEvent" xml:space="preserve">
+    <value>Calendar event</value>
+  </data>
+  <data name="KindGs1" xml:space="preserve">
+    <value>GS1 data</value>
+  </data>
+  <data name="KindProduct" xml:space="preserve">
+    <value>Product code</value>
+  </data>
+
+  <data name="SourceCamera" xml:space="preserve">
+    <value>Camera</value>
+  </data>
+  <data name="SourceNfc" xml:space="preserve">
+    <value>NFC tag</value>
+  </data>
+  <data name="SourceImageFile" xml:space="preserve">
+    <value>Photo</value>
+  </data>
+
+  <data name="OkButton" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="ErrorTitle" xml:space="preserve">
+    <value>Something went wrong</value>
+  </data>
+</root>

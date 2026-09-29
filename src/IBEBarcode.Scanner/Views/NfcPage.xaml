@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="IBEBarcode.Scanner.Views.NfcPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:views="clr-namespace:IBEBarcode.Scanner.Views"
+    Title="NFC">
+
+    <ScrollView Padding="16">
+        <VerticalStackLayout Spacing="12">
+
+            <Label FontAttributes="Bold" FontSize="20" Text="{Binding Title}" />
+
+            <Label
+                FontSize="14"
+                Text="{Binding StatusMessage}"
+                TextColor="{AppThemeBinding Light=#57606A, Dark=#9BA3AD}" />
+
+            <Button
+                Command="{Binding ToggleScanCommand}"
+                HorizontalOptions="Start"
+                IsVisible="{Binding CanStart}"
+                Text="{Binding StartButtonText}" />
+
+            <Grid IsVisible="{Binding HasResult}">
+                <views:ScanResultCard BindingContext="{Binding CurrentResult}" />
+            </Grid>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

@@ -1,0 +1,4 @@
+/* Localized Info.plist strings. Keys must match the Info.plist entries. */
+"NSCameraUsageDescription" = "IBE Barcode Scanner uses the camera to read barcodes, QR codes and labels.";
+"NSPhotoLibraryUsageDescription" = "IBE Barcode Scanner can read a barcode from a photo you choose.";
+"NFCReaderUsageDescription" = "IBE Barcode Scanner reads NFC tags on request to show their text or link.";

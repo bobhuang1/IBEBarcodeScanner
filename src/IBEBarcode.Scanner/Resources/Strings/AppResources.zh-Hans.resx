@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <data name="AppTitle" xml:space="preserve"><value>IBE 条码扫描器</value></data>
+  <data name="ScanTabTitle" xml:space="preserve"><value>扫描</value></data>
+  <data name="NfcTabTitle" xml:space="preserve"><value>NFC</value></data>
+  <data name="HistoryTabTitle" xml:space="preserve"><value>历史记录</value></data>
+  <data name="AboutTabTitle" xml:space="preserve"><value>关于</value></data>
+
+  <data name="ScanHint" xml:space="preserve"><value>请将相机对准条码或二维码。</value></data>
+  <data name="ScanReading" xml:space="preserve"><value>正在读取条码…</value></data>
+  <data name="CameraStarting" xml:space="preserve"><value>正在启动相机…</value></data>
+  <data name="ScanIdleHint" xml:space="preserve"><value>轻触“扫描”即可读取条码。</value></data>
+  <data name="ScanStartButton" xml:space="preserve"><value>扫描</value></data>
+  <data name="ScanNotFound" xml:space="preserve"><value>未找到条码。请拿稳标签后重试。</value></data>
+  <data name="TorchOn" xml:space="preserve"><value>补光灯已开</value></data>
+  <data name="TorchOff" xml:space="preserve"><value>补光灯已关</value></data>
+  <data name="SwitchCameraButton" xml:space="preserve"><value>切换相机</value></data>
+  <data name="CapturedFrameHint" xml:space="preserve"><value>MSI Plessey 和 USPS Postnet 条码会从捕获的画面读取：请保持标签稳定并填满画面。</value></data>
+  <data name="CapturedFrameFound" xml:space="preserve"><value>已从捕获的画面读取。</value></data>
+  <data name="ScanFromPhotoButton" xml:space="preserve"><value>扫描照片</value></data>
+  <data name="PhotoScanNotFound" xml:space="preserve"><value>无法从该照片中解码任何内容。</value></data>
+  <data name="PhotoScanFailed" xml:space="preserve"><value>无法打开该照片。</value></data>
+  <data name="CameraPermissionTitle" xml:space="preserve"><value>需要相机权限</value></data>
+  <data name="CameraPermissionMessage" xml:space="preserve"><value>IBE 条码扫描器需要相机来读取条码。您可以在系统设置中授予权限。</value></data>
+  <data name="OpenSettingsButton" xml:space="preserve"><value>打开设置</value></data>
+  <data name="CameraUnavailable" xml:space="preserve"><value>此设备上没有可用的相机。</value></data>
+
+  <data name="ResultTitle" xml:space="preserve"><value>最近一次扫描</value></data>
+  <data name="ResultSymbology" xml:space="preserve"><value>条码类型</value></data>
+  <data name="ResultKind" xml:space="preserve"><value>内容类型</value></data>
+  <data name="ResultValue" xml:space="preserve"><value>值</value></data>
+  <data name="ResultRawValue" xml:space="preserve"><value>原始值</value></data>
+  <data name="ResultSource" xml:space="preserve"><value>来源</value></data>
+  <data name="ResultScannedAt" xml:space="preserve"><value>扫描时间</value></data>
+  <data name="ResultGs1Title" xml:space="preserve"><value>GS1 元素</value></data>
+  <data name="ResultIsbn13" xml:space="preserve"><value>ISBN-13</value></data>
+  <data name="ResultIsbn10" xml:space="preserve"><value>ISBN-10</value></data>
+  <data name="ResultExpandedUpcA" xml:space="preserve"><value>对应的 UPC-A</value></data>
+  <data name="ResultCheckDigitValid" xml:space="preserve"><value>校验位已验证</value></data>
+  <data name="ResultCheckDigitUnverified" xml:space="preserve"><value>校验位未验证——使用前请确认该值。</value></data>
+  <data name="ResultNone" xml:space="preserve"><value>尚未扫描任何内容。</value></data>
+  <data name="ResultLink" xml:space="preserve"><value>链接</value></data>
+  <data name="ResultSearchHint" xml:space="preserve"><value>轻触可在网上搜索</value></data>
+  <data name="ResultAlsoFound" xml:space="preserve"><value>同一画面中的其他条码</value></data>
+  <data name="ResultSearchAction" xml:space="preserve"><value>在 Google 上搜索</value></data>
+  <data name="ResultOpenLinkAction" xml:space="preserve"><value>打开链接</value></data>
+  <data name="ResultCopyAction" xml:space="preserve"><value>复制</value></data>
+  <data name="ResultShareAction" xml:space="preserve"><value>分享</value></data>
+  <data name="CopiedMessage" xml:space="preserve"><value>已复制到剪贴板。</value></data>
+  <data name="LinkOpenFailed" xml:space="preserve"><value>没有可以打开的浏览器。</value></data>
+
+  <data name="HistoryTitle" xml:space="preserve"><value>本次会话</value></data>
+  <data name="HistoryEmpty" xml:space="preserve"><value>您扫描的内容会显示在这里。应用关闭后不会保留任何记录。</value></data>
+  <data name="HistoryCount" xml:space="preserve"><value>共 {0} 次扫描</value></data>
+  <data name="ClearResultButton" xml:space="preserve"><value>清除</value></data>
+  <data name="ClearHistoryButton" xml:space="preserve"><value>清除历史记录</value></data>
+  <data name="NoDatabaseNote" xml:space="preserve"><value>无数据库、无账户：所有数据都保留在本设备上。</value></data>
+
+  <data name="NfcTitle" xml:space="preserve"><value>NFC 标签</value></data>
+  <data name="NfcStartButton" xml:space="preserve"><value>开始 NFC 扫描</value></data>
+  <data name="NfcStopButton" xml:space="preserve"><value>停止 NFC 扫描</value></data>
+  <data name="NfcWaiting" xml:space="preserve"><value>请将手机顶部靠近标签…</value></data>
+  <data name="NfcIdle" xml:space="preserve"><value>先开始扫描，然后轻触标签。</value></data>
+  <data name="NfcNotSupportedAndroid" xml:space="preserve"><value>此设备没有 NFC 硬件。</value></data>
+  <data name="NfcNotSupportedIos" xml:space="preserve"><value>在 iPhone 上读取 NFC 标签需要 Apple 开发者 NFC 权限，计划在后续版本中支持。相机扫描可正常使用。</value></data>
+  <data name="NfcDisabled" xml:space="preserve"><value>NFC 已关闭。请在系统设置中启用后再扫描标签。</value></data>
+  <data name="NfcEmptyTag" xml:space="preserve"><value>标签已读取，但不包含文本或链接。</value></data>
+  <data name="NfcReadError" xml:space="preserve"><value>无法读取标签，请重试。</value></data>
+
+  <data name="AboutTitle" xml:space="preserve"><value>IBE 条码扫描器</value></data>
+  <data name="AboutDescription" xml:space="preserve"><value>免费开源的条码、二维码和 NFC 标签扫描器。可读取 IBE Barcode Generator 打印的所有格式，无需数据库，也不会将任何数据发送到设备之外。</value></data>
+  <data name="AboutVersion" xml:space="preserve"><value>版本</value></data>
+  <data name="AboutLicense" xml:space="preserve"><value>许可证</value></data>
+  <data name="AboutLicenseValue" xml:space="preserve"><value>MIT</value></data>
+  <data name="AboutCoverage" xml:space="preserve"><value>支持的格式</value></data>
+  <data name="AboutCoverageText" xml:space="preserve"><value>相机：Codabar、Code 39 与扩展 Code 39、Code 93、Code 128、GS1-128、交叉二五码、EAN-8、EAN-13、UPC-A、UPC-E、UPC 附加码、ISBN、QR 码、Data Matrix、PDF417、Aztec，以及从捕获的画面读取的 MSI Plessey 和 USPS Postnet。
+NFC：包含链接、文本、电子邮件地址、电话号码或 WiFi 信息的 NDEF 标签。</value></data>
+  <data name="AboutLimitations" xml:space="preserve"><value>已知限制</value></data>
+  <data name="AboutLimitationsText" xml:space="preserve"><value>iPhone 上的 NFC 读取需要 Apple 开发者权限，本版本暂不包含。MSI Plessey 和 USPS Postnet 通过捕获画面解码，因此需要平稳、光照充足的标签，不适合远距离扫描。Android 扫描使用 Google ML Kit，需要 Google Play 服务。</value></data>
+  <data name="AboutCompanion" xml:space="preserve"><value>IBE 条码生成器的配套应用，打印格式已与其逐一验证。</value></data>
+
+  <data name="HelpTitle" xml:space="preserve"><value>使用方法</value></data>
+  <data name="HelpScanTitle" xml:space="preserve"><value>扫描条码</value></data>
+  <data name="HelpScanText" xml:space="preserve"><value>将相机对准标签并轻触“扫描”。应用会拍下相机中的画面并从中读取条码，未轻触前不会进行任何解码。如果未能读取，警告会自动消失，再次轻触“扫描”即可。</value></data>
+  <data name="HelpPhotoTitle" xml:space="preserve"><value>从照片读取</value></data>
+  <data name="HelpPhotoText" xml:space="preserve"><value>轻触“扫描照片”可从手机中已有的图片读取条码。适合已经拍好的标签，或不容易拿稳的标签。</value></data>
+  <data name="HelpResultTitle" xml:space="preserve"><value>使用扫描结果</value></data>
+  <data name="HelpResultText" xml:space="preserve"><value>结果会显示内容及其格式。轻触内容即可在网上搜索。如果条码中包含链接，链接会显示在内容下方，轻触即可在浏览器中打开。“复制”和“共享”可将内容转交出去。</value></data>
+  <data name="HelpNfcTitle" xml:space="preserve"><value>读取 NFC 标签</value></data>
+  <data name="HelpNfcText" xml:space="preserve"><value>在“NFC”标签页轻触“开始 NFC 扫描”，并将手机顶部靠近标签直到读取完成。把标签靠近手机也可以直接打开本应用。</value></data>
+  <data name="HelpTipsTitle" xml:space="preserve"><value>提示</value></data>
+  <data name="HelpTipsText" xml:space="preserve"><value>“补光灯”按钮可为较暗的标签打开补光灯，“切换相机”按钮可切换后置与前置相机。读取的内容会保留在“历史记录”中直到关闭应用，只留在本机。</value></data>
+
+  <data name="LanguageTitle" xml:space="preserve"><value>语言</value></data>
+  <data name="LanguageSystem" xml:space="preserve"><value>跟随设备</value></data>
+  <data name="LanguageEnglish" xml:space="preserve"><value>English</value></data>
+  <data name="LanguageChineseSimplified" xml:space="preserve"><value>简体中文</value></data>
+  <data name="LanguageChineseTraditional" xml:space="preserve"><value>繁體中文</value></data>
+  <data name="LanguageJapanese" xml:space="preserve"><value>日本語</value></data>
+
+  <data name="KindText" xml:space="preserve"><value>文本</value></data>
+  <data name="KindUrl" xml:space="preserve"><value>链接</value></data>
+  <data name="KindEmail" xml:space="preserve"><value>电子邮件地址</value></data>
+  <data name="KindPhone" xml:space="preserve"><value>电话号码</value></data>
+  <data name="KindSms" xml:space="preserve"><value>短信</value></data>
+  <data name="KindWifi" xml:space="preserve"><value>WiFi 信息</value></data>
+  <data name="KindContact" xml:space="preserve"><value>联系人</value></data>
+  <data name="KindGeographicCoordinates" xml:space="preserve"><value>位置</value></data>
+  <data name="KindCalendarEvent" xml:space="preserve"><value>日历事件</value></data>
+  <data name="KindGs1" xml:space="preserve"><value>GS1 数据</value></data>
+  <data name="KindProduct" xml:space="preserve"><value>产品代码</value></data>
+
+  <data name="SourceCamera" xml:space="preserve"><value>相机</value></data>
+  <data name="SourceNfc" xml:space="preserve"><value>NFC 标签</value></data>
+  <data name="SourceImageFile" xml:space="preserve"><value>照片</value></data>
+
+  <data name="OkButton" xml:space="preserve"><value>确定</value></data>
+  <data name="ErrorTitle" xml:space="preserve"><value>出现问题</value></data>
+</root>

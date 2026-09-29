@@ -117,12 +117,13 @@ jobs:
       - uses: actions/checkout@v4
 
       # Pinned rather than left to the image default: the .NET for iOS workload is bound to a
-      # specific Xcode SDK band, so an image update that moves the default Xcode breaks the build
-      # for reasons that have nothing to do with this code.
+      # specific Xcode SDK band (pinned in the csproj via TargetPlatformVersion), so an image
+      # update that moves the default Xcode breaks the build for reasons that have nothing to
+      # do with this code.
       - name: Select Xcode
         run: |
           set -euo pipefail
-          for candidate in /Applications/Xcode_26.6.app /Applications/Xcode_26.5.app; do
+          for candidate in /Applications/Xcode_26.5.app /Applications/Xcode_26.6.app; do
             if [ -d "$candidate" ]; then
               sudo xcode-select -s "$candidate"
               break

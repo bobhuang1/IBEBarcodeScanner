@@ -28,6 +28,14 @@
 
 		<!-- Matches the minimums BarcodeScanning.Native.Maui declares. -->
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.1</SupportedOSPlatformVersion>
+
+		<!--
+			Pin the iOS 26.5 workload band (the band the dev machine and CI both use).
+			Without this, NuGet restore resolves the newest band (27.0), which hard-requires
+			Xcode 27 and fails on any machine or image that ships Xcode 26.x. A 26.5 band
+			builds fine against a newer 26.x Xcode.
+		-->
+		<TargetPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">26.5</TargetPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</SupportedOSPlatformVersion>
 
 		<!--

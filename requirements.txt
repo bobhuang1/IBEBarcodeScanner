@@ -1,7 +1,7 @@
 This is a new project that will reside in:
-C:\GitHub\IBEGroup\IBEBarcodeScanner
+C:\GitHub\IBEBarcodeStudio\IBEBarcodeScanner
 
-It works together with C:\GitHub\IBEGroup\IBEBarcodeGeneratror
+It works together with C:\GitHub\IBEBarcodeStudio\IBEBarcodeGeneratror
 
 Name "IBE Barcode Scanner", allows user to scan different kinds of barcodes, it should be able to scan barcodes created by IBEBarcodeGenerator:
 1. Standard printed barcodes including QR codes using camera on IOS and Android phones

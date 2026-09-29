@@ -117,7 +117,9 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Install the Android workload
-        run: dotnet workload install maui-android
+        # Full maui, not maui-android: the project multi-targets iOS too and MSBuild evaluates
+        # both TFMs, so the iOS manifest must exist even on this Android-only build (NETSDK1178).
+        run: dotnet workload install maui
 
       # The keystore is written to the runner's temp directory, never into the checkout, and the
       # passwords go into files so MSBuild can be handed them with the file: prefix instead of

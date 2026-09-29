@@ -62,6 +62,9 @@ outstanding are tracked in `docs/testing/device-checklist.md`.
 - `docs/testing/device-checklist.md` — the manual test matrix for real hardware.
 - `docs/testing/packaging-and-ci.md` — the release artifacts, the signing material and the CI/CD
   pipelines, including what an iPhone build actually needs.
+- `CLAUDE.md` — the internal handoff document: standing architectural decisions that are not up for
+  renegotiation, the environment and its traps, commit rules, and where the project was left off.
+  Read it before changing anything in this repository.
 
 ## Build and test
 

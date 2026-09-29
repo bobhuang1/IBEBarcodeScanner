@@ -35,9 +35,9 @@ with a known value:
 ## Automated (already green)
 
 - [x] `dotnet build IBEBarcodeScanner.slnx` — Core, tests and the app for `net10.0-android` and `net10.0-ios`.
-- [x] `dotnet test` — 128 tests: payload classification, GS1 AI parsing, UPC/EAN/ISBN normalization, NDEF
+- [x] `dotnet test` — 145 tests: payload classification, GS1 AI parsing, UPC/EAN/ISBN normalization, NDEF
       parsing, deduplication, imaging primitives, MSI Plessey decoding, Postnet decoding, the frame decoder
-      chain, and the four localization files.
+      chain, the Google-search URL builder, and the four localization files.
 - [x] Decoder tests render the generator's exact MSI Plessey and Postnet patterns synthetically, including
       damaged, truncated, rotated, text-contaminated and noisy inputs.
 

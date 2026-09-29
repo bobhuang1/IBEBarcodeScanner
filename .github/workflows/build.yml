@@ -112,24 +112,13 @@ jobs:
 
   ios:
     name: iOS build
-    runs-on: macos-26
+    # The Xcode 27 image, not macos-26: the .NET for iOS workload must resolve the same SDK
+    # band NuGet serves CI (currently 27.0), and that band hard-requires Xcode 27. The macos-26
+    # image tops out at Xcode 26.6 and fails with "requires Xcode 27". Revisit when the dev
+    # machine's 26.5 band is retired.
+    runs-on: xcode-27
     steps:
       - uses: actions/checkout@v4
-
-      # Pinned rather than left to the image default: the .NET for iOS workload is bound to a
-      # specific Xcode SDK band (pinned in the csproj via TargetPlatformVersion), so an image
-      # update that moves the default Xcode breaks the build for reasons that have nothing to
-      # do with this code.
-      - name: Select Xcode
-        run: |
-          set -euo pipefail
-          for candidate in /Applications/Xcode_26.5.app /Applications/Xcode_26.6.app; do
-            if [ -d "$candidate" ]; then
-              sudo xcode-select -s "$candidate"
-              break
-            fi
-          done
-          xcodebuild -version
 
       - uses: actions/setup-dotnet@v4
         with:

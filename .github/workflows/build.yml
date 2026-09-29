@@ -1,5 +1,16 @@
 name: build
 
+# The pipeline that runs on every push and pull request. Its job is signal, not shipping:
+#
+#   tests    - the platform-independent logic, fast and never flaky
+#   android  - a real Release APK; Android builds on Linux, so this is the strongest signal
+#   ios      - compiles on macOS. A device .ipa is a release-pipeline concern (release.yml),
+#              because it needs Apple signing material that must not be needed to see whether
+#              the code still compiles.
+#
+# The Android job also uploads an installable APK, so a build can be put on a phone without a
+# local toolchain. release.yml is the one that produces the released artifacts.
+
 on:
   push:
     branches:
@@ -12,6 +23,7 @@ env:
   DOTNET_NOLOGO: true
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
   DOTNET_CLI_TELEMETRY_OPTOUT: true
+  PROJECT: src/IBEBarcode.Scanner/IBEBarcode.Scanner.csproj
 
 jobs:
   tests:
@@ -31,6 +43,10 @@ jobs:
   android:
     name: Android build
     runs-on: ubuntu-latest
+    env:
+      # The secrets context is not available to a step's `if`, so whether the release keystore
+      # exists is decided once here and read back as an environment variable.
+      HAS_ANDROID_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -41,15 +57,78 @@ jobs:
       - name: Install MAUI Android workload
         run: dotnet workload install maui-android
 
-      # Android builds on Linux, which makes this the strongest signal on every push.
-      - name: Build
-        run: dotnet build src/IBEBarcode.Scanner/IBEBarcode.Scanner.csproj -f net10.0-android --configuration Release
+      # If the release keystore is configured, use it even for a push build: APKs signed with the
+      # same key install over each other, while each runner gets a fresh debug keystore, so
+      # debug-signed push builds would all have to be uninstalled first. Forks and pull requests
+      # have no secrets, in which case this falls back to the debug key with a warning.
+      - name: Unpack the signing key
+        if: env.HAS_ANDROID_KEYSTORE == 'true'
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          printf '%s' "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/ibe.keystore"
+          printf '%s' "$KEYSTORE_PASSWORD" > "$RUNNER_TEMP/storepass"
+          printf '%s' "$KEY_PASSWORD" > "$RUNNER_TEMP/keypass"
+
+      - name: Publish
+        env:
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          set -euo pipefail
+          args=(
+            -f net10.0-android
+            -c Release
+            -o dist
+            -p:AndroidPackageFormat=apk
+            -p:ApplicationVersion=${{ github.run_number }}
+          )
+          if [ "$HAS_ANDROID_KEYSTORE" = "true" ]; then
+            echo "Signing with the release keystore, alias '$KEY_ALIAS'."
+            args+=(
+              -p:AndroidKeyStore=true
+              -p:AndroidSigningKeyStore="$RUNNER_TEMP/ibe.keystore"
+              -p:AndroidSigningKeyAlias="$KEY_ALIAS"
+              -p:AndroidSigningKeyPass="file:$RUNNER_TEMP/keypass"
+              -p:AndroidSigningStorePass="file:$RUNNER_TEMP/storepass"
+            )
+          else
+            echo "::warning title=Debug signing key::No ANDROID_KEYSTORE_BASE64 secret, so this APK is signed with the runner's own debug key. It installs, but not over any build signed with a different key."
+          fi
+          dotnet publish "$PROJECT" "${args[@]}"
+          mv dist/*-Signed.apk "ibe-barcode-scanner-${{ github.sha }}.apk"
+
+      - name: Upload the APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          if-no-files-found: error
+          # Long enough to be useful, short enough not to pile up: release.yml keeps the ones
+          # that are meant to be kept.
+          retention-days: 14
+          path: ibe-barcode-scanner-*.apk
 
   ios:
     name: iOS build
-    runs-on: macos-latest
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v4
+
+      # Pinned rather than left to the image default: the .NET for iOS workload is bound to a
+      # specific Xcode SDK band, so an image update that moves the default Xcode breaks the build
+      # for reasons that have nothing to do with this code.
+      - name: Select Xcode
+        run: |
+          set -euo pipefail
+          for candidate in /Applications/Xcode_26.6.app /Applications/Xcode_26.5.app; do
+            if [ -d "$candidate" ]; then
+              sudo xcode-select -s "$candidate"
+              break
+            fi
+          done
+          xcodebuild -version
 
       - uses: actions/setup-dotnet@v4
         with:
@@ -58,7 +137,10 @@ jobs:
       - name: Install MAUI workload
         run: dotnet workload install maui
 
-      # Simulator build, so no signing material is needed. A device archive build uses the
-      # usual Apple signing secrets (certificate, provisioning profile) instead.
+      # Simulator build, so no signing material is needed, and the C# and XAML are compiled the
+      # same way a device build compiles them. If this ever fails with actool reporting "No
+      # simulator runtime version ... available to use with iphonesimulator SDK version ...", the
+      # image is missing the runtime: see the workaround in release.yml
+      # (IOS_DOWNLOAD_SIMULATOR_RUNTIME) and docs/testing/packaging-and-ci.md.
       - name: Build
         run: dotnet build src/IBEBarcode.Scanner/IBEBarcode.Scanner.csproj -f net10.0-ios --configuration Release -p:RuntimeIdentifier=iossimulator-arm64

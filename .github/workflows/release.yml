@@ -1,0 +1,470 @@
+name: release
+
+# Builds the installable artifacts and attaches them to a GitHub Release.
+#
+#   git tag v1.0.1 && git push origin v1.0.1     -> builds everything and creates the release
+#   Actions -> release -> Run workflow            -> artifacts only, unless a tag is typed in
+#
+# What you get, and where each file is meant to go, is written up in
+# docs/testing/packaging-and-ci.md, along with the keystore and the iOS signing material.
+#
+# Nothing here invents a build command: every step is the same `dotnet publish` used by hand, with
+# the platform's own signing properties supplied from repository secrets. Secrets are optional.
+# Without them the Android flavors still produce working APKs signed with the runner's debug key
+# (with a warning in the log), and the iOS job explains what it is missing instead of failing.
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to create the release under. Leave empty to only upload the artifacts.'
+        required: false
+        type: string
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  PROJECT: src/IBEBarcode.Scanner/IBEBarcode.Scanner.csproj
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    name: Core tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      # A tag can be pushed from a commit that never went through the push pipeline, so the
+      # release is gated on the platform-independent tests rather than assumed to be green.
+      - name: Test
+        run: dotnet test tests/IBEBarcode.Scanner.Core.Tests --configuration Release
+
+  version:
+    name: Read the version
+    runs-on: ubuntu-latest
+    outputs:
+      display: ${{ steps.read.outputs.display }}
+      code: ${{ steps.read.outputs.code }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # ApplicationDisplayVersion comes from the project file, which is the one thing to bump
+      # before tagging. The version *code* is the run number: Android needs it to increase with
+      # every upload, and Apple only uses it as a build number.
+      - id: read
+        name: Read ApplicationDisplayVersion
+        run: |
+          set -euo pipefail
+          display=$(sed -n 's:.*<ApplicationDisplayVersion>\(.*\)</ApplicationDisplayVersion>.*:\1:p' "$PROJECT" | head -1)
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            display="${GITHUB_REF_NAME#v}"
+          fi
+          echo "display=$display" >> "$GITHUB_OUTPUT"
+          echo "code=$GITHUB_RUN_NUMBER" >> "$GITHUB_OUTPUT"
+
+  android:
+    name: Android ${{ matrix.label }}
+    needs: [tests, version]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      # Five flavors, each built on its own runner so no two share an obj/ directory:
+      #
+      #   arm64-v8a   64-bit ARM, every phone of the last several years
+      #   armeabi-v7a 32-bit ARM, older and low-cost handsets
+      #   x86_64      Intel, emulators and some Chromebooks
+      #   universal   one APK carrying all three, for handing to somebody else
+      #   bundle      the .aab Google Play wants
+      #
+      # The ABI is selected through `-p:AndroidAbi`, a property only this project understands.
+      # `-p:RuntimeIdentifier` cannot be used: it is a global MSBuild property, so it reaches the
+      # referenced Core library as well, where android-arm resolves through the RID graph to
+      # linux-bionic-arm and restore fails with NU1101. See the comment in the project file.
+      matrix:
+        include:
+          - abi: android-arm64
+            label: arm64-v8a
+            format: apk
+          - abi: android-arm
+            label: armeabi-v7a
+            format: apk
+          - abi: android-x64
+            label: x86_64
+            format: apk
+          - abi: ''
+            label: universal
+            format: apk
+          - abi: ''
+            label: bundle
+            format: aab
+    env:
+      HAS_ANDROID_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install the Android workload
+        run: dotnet workload install maui-android
+
+      # The keystore is written to the runner's temp directory, never into the checkout, and the
+      # passwords go into files so MSBuild can be handed them with the file: prefix instead of
+      # having them on the command line and in the build log.
+      - name: Unpack the signing key
+        if: env.HAS_ANDROID_KEYSTORE == 'true'
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          printf '%s' "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/ibe.keystore"
+          printf '%s' "$KEYSTORE_PASSWORD" > "$RUNNER_TEMP/storepass"
+          printf '%s' "$KEY_PASSWORD" > "$RUNNER_TEMP/keypass"
+
+      - name: Publish
+        env:
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          LABEL: ${{ matrix.label }}
+        run: |
+          set -euo pipefail
+          args=(
+            -f net10.0-android
+            -c Release
+            -o dist
+            -p:AndroidPackageFormat=${{ matrix.format }}
+            -p:ApplicationDisplayVersion=${{ needs.version.outputs.display }}
+            -p:ApplicationVersion=${{ needs.version.outputs.code }}
+          )
+          if [ -n "${{ matrix.abi }}" ]; then
+            args+=( -p:AndroidAbi=${{ matrix.abi }} )
+          fi
+
+          if [ "$HAS_ANDROID_KEYSTORE" = "true" ]; then
+            echo "Signing with the release keystore, alias '$KEY_ALIAS'."
+            args+=(
+              -p:AndroidKeyStore=true
+              -p:AndroidSigningKeyStore="$RUNNER_TEMP/ibe.keystore"
+              -p:AndroidSigningKeyAlias="$KEY_ALIAS"
+              -p:AndroidSigningKeyPass="file:$RUNNER_TEMP/keypass"
+              -p:AndroidSigningStorePass="file:$RUNNER_TEMP/storepass"
+            )
+          else
+            echo "::warning title=Debug signing key::ANDROID_KEYSTORE_BASE64 is not set, so this artifact is signed with the runner's own debug key. It installs, but it cannot update an install signed with any other key, and it must never be published."
+          fi
+          dotnet publish "$PROJECT" "${args[@]}"
+          ls -la dist
+
+      # One artifact per flavor, named so that the download is self-describing. A bundle build
+      # also drops a signed and an unsigned .aab and an APK beside the bundle, so the file to
+      # keep is picked by suffix rather than by extension alone.
+      - name: Name it and record the signature
+        env:
+          VERSION: ${{ needs.version.outputs.display }}
+        run: |
+          set -euo pipefail
+          case "${{ matrix.label }}" in
+            bundle)
+              mv dist/*-Signed.aab "ibe-barcode-scanner-${VERSION}.aab"
+              artifact="ibe-barcode-scanner-${VERSION}.aab"
+              printf 'bundle — %s — for Google Play; re-signed by Play App Signing, so this key becomes the upload key\n' \
+                "$(du -h "$artifact" | cut -f1)" > "signing-info-${{ matrix.label }}.txt"
+              ;;
+            universal)
+              mv dist/*-Signed.apk "ibe-barcode-scanner-${VERSION}-universal.apk"
+              artifact="ibe-barcode-scanner-${VERSION}-universal.apk"
+              ;;
+            *)
+              mv dist/*-Signed.apk "ibe-barcode-scanner-${VERSION}-${{ matrix.label }}.apk"
+              artifact="ibe-barcode-scanner-${VERSION}-${{ matrix.label }}.apk"
+              ;;
+          esac
+          echo "ARTIFACT=$artifact" >> "$GITHUB_ENV"
+          ls -la "$artifact"
+
+          # Which key signed this is worth recording: a debug signature means the build had no
+          # release keystore, which is invisible in the artifact itself.
+          if [ "${artifact##*.}" != "aab" ]; then
+            apksigner=""
+            for candidate in "$ANDROID_HOME"/build-tools/*/apksigner "$ANDROID_SDK_ROOT"/build-tools/*/apksigner; do
+              if [ -x "$candidate" ]; then apksigner="$candidate"; fi
+            done
+            signer="not verified (no apksigner on this runner)"
+            if [ -n "$apksigner" ]; then
+              signer=$("$apksigner" verify --print-certs "$artifact" | sed -n 's/^Signer #1 certificate DN: //p' | head -1)
+            fi
+            printf '%s — %s — signed by %s\n' \
+              "${{ matrix.label }}" "$(du -h "$artifact" | cut -f1)" "$signer" \
+              > "signing-info-${{ matrix.label }}.txt"
+          fi
+          cat "signing-info-${{ matrix.label }}.txt"
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-${{ matrix.label }}
+          if-no-files-found: error
+          path: |
+            ibe-barcode-scanner-*
+            signing-info-${{ matrix.label }}.txt
+
+  ios-ipa:
+    name: iOS IPA
+    needs: [tests, version]
+    # Apple's toolchain is macOS-only, which is why this job cannot sit on the same runner as the
+    # Android ones. macos-26 is Apple silicon, and is what macos-latest currently points at.
+    runs-on: macos-26
+    env:
+      HAS_IOS_SIGNING: ${{ secrets.IOS_CERTIFICATE_P12_BASE64 != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # Pinned rather than left to the image default: the .NET for iOS workload is bound to a
+      # specific Xcode SDK band, and an image update that moves the default Xcode is enough to
+      # break the build for reasons that have nothing to do with this code.
+      - name: Select Xcode
+        run: |
+          set -euo pipefail
+          for candidate in /Applications/Xcode_26.6.app /Applications/Xcode_26.5.app; do
+            if [ -d "$candidate" ]; then
+              sudo xcode-select -s "$candidate"
+              break
+            fi
+          done
+          xcodebuild -version
+          xcode-select -p
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install the MAUI workload
+        run: dotnet workload install maui
+
+      # Some runner images ship an iOS SDK whose simulator runtime is missing, which makes actool
+      # fail with "No simulator runtime version ... available to use with iphonesimulator SDK
+      # version ..." even for a device build (dotnet/macios#25298, #25473). The download is several
+      # GB, so it is opt-in: set the repository variable IOS_DOWNLOAD_SIMULATOR_RUNTIME to 1 if
+      # that is the error you are looking at.
+      - name: Fetch the iOS simulator runtime (opt-in workaround)
+        if: vars.IOS_DOWNLOAD_SIMULATOR_RUNTIME == '1'
+        continue-on-error: true
+        run: xcodebuild -downloadPlatform iOS
+
+      # A certificate in a keychain plus a profile in the folder codesign looks in is everything
+      # the signature needs; this is what the Xcode UI does when an account is added, spelled out
+      # so it needs no third-party action.
+      - name: Import the signing certificate and profile
+        if: env.HAS_IOS_SIGNING == 'true'
+        env:
+          CERTIFICATE_P12_BASE64: ${{ secrets.IOS_CERTIFICATE_P12_BASE64 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
+          PROVISIONING_PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
+        run: |
+          set -euo pipefail
+          keychain="$RUNNER_TEMP/ibe-signing.keychain-db"
+          keychain_password=$(openssl rand -hex 16)
+
+          security create-keychain -p "$keychain_password" "$keychain"
+          security set-keychain-settings -lut 3600 "$keychain"
+          security unlock-keychain -p "$keychain_password" "$keychain"
+
+          printf '%s' "$CERTIFICATE_P12_BASE64" | openssl base64 -d -A -out "$RUNNER_TEMP/certificate.p12"
+          security import "$RUNNER_TEMP/certificate.p12" \
+            -k "$keychain" -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: \
+            -s -k "$keychain_password" "$keychain" >/dev/null
+
+          existing=$(security list-keychains -d user | tr -d '"')
+          security list-keychains -d user -s "$keychain" $existing
+
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          printf '%s' "$PROVISIONING_PROFILE_BASE64" \
+            | openssl base64 -d -A -out "$HOME/Library/MobileDevice/Provisioning Profiles/ibe.mobileprovision"
+
+          security find-identity -v -p codesigning
+
+      - name: Publish the signed IPA
+        if: env.HAS_IOS_SIGNING == 'true'
+        env:
+          CODESIGN_KEY: ${{ secrets.IOS_CODESIGN_KEY }}
+          PROVISIONING_PROFILE_NAME: ${{ secrets.IOS_PROVISIONING_PROFILE_NAME }}
+        run: |
+          set -euo pipefail
+          dotnet publish "$PROJECT" \
+            -f net10.0-ios \
+            -c Release \
+            -p:ArchiveOnBuild=true \
+            -p:RuntimeIdentifier=ios-arm64 \
+            -p:CodesignKey="$CODESIGN_KEY" \
+            -p:CodesignProvision="$PROVISIONING_PROFILE_NAME" \
+            -p:ApplicationDisplayVersion=${{ needs.version.outputs.display }} \
+            -p:ApplicationVersion=${{ needs.version.outputs.code }}
+
+      # Best effort, and off unless asked for: an unsigned .ipa is only useful to somebody who
+      # re-signs it themselves (Sideloadly, AltStore, a jailbroken device). iOS will not install
+      # it as it stands.
+      - name: Publish an unsigned IPA (experimental)
+        if: env.HAS_IOS_SIGNING != 'true' && vars.IOS_TRY_UNSIGNED_IPA == '1'
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          dotnet publish "$PROJECT" \
+            -f net10.0-ios \
+            -c Release \
+            -p:ArchiveOnBuild=true \
+            -p:RuntimeIdentifier=ios-arm64 \
+            -p:CodesignKey= \
+            -p:CodesignProvision=
+          for app in src/IBEBarcode.Scanner/bin/Release/net10.0-ios/ios-arm64/*.app; do
+            rm -rf unsigned && mkdir -p unsigned/Payload
+            cp -R "$app" unsigned/Payload/
+            (cd unsigned && zip -qry ipa Payload)
+            mv unsigned/ipa ./
+          done
+          ls -la ./*.ipa || echo "no .ipa was produced"
+
+      - name: Explain the missing signing material
+        if: env.HAS_IOS_SIGNING != 'true'
+        run: |
+          {
+            echo "### No signed IPA in this run"
+            echo
+            echo "iOS refuses to install an app that is not signed by an Apple-issued certificate, and"
+            echo "there is no way around that from this side: the toolchain is macOS-only, and the"
+            echo "certificate belongs to an Apple account, not to the repository."
+            echo
+            echo "A free Apple ID is enough for a development build that installs on the devices"
+            echo "registered to it (it expires after 7 days). Distribution, TestFlight and the App"
+            echo "Store need the paid Apple Developer Program."
+            echo
+            echo "See \`docs/testing/packaging-and-ci.md\` for the secrets to set."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Collect the IPA
+        env:
+          VERSION: ${{ needs.version.outputs.display }}
+        run: |
+          set -euo pipefail
+          for ipa in src/IBEBarcode.Scanner/bin/Release/net10.0-ios/ios-arm64/publish/*.ipa; do
+            [ -f "$ipa" ] || continue
+            cp "$ipa" "ibe-barcode-scanner-${VERSION}.ipa"
+          done
+          ls -la ./*.ipa || echo "no .ipa to collect"
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-ipa
+          # A missing IPA is a configuration state, not a broken build; the step summary above
+          # explains it.
+          if-no-files-found: warn
+          path: ibe-barcode-scanner-*.ipa
+
+  release:
+    name: GitHub Release
+    needs: [tests, version, android, ios-ipa]
+    # Only a tag (or one typed in by hand) means "this is a release"; a manual run without a tag is
+    # a build, and its artifacts stay in the run.
+    if: ${{ github.ref_type == 'tag' || inputs.tag != '' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Sort the files out
+        run: |
+          set -euo pipefail
+          ls -la dist
+          mkdir -p info
+          mv dist/signing-info-*.txt info/ 2>/dev/null || true
+
+      - name: Write the release notes
+        env:
+          VERSION: ${{ needs.version.outputs.display }}
+        run: |
+          set -euo pipefail
+          notes="$RUNNER_TEMP/release-notes.md"
+          {
+            echo "## IBE Barcode Scanner ${VERSION}"
+            echo
+            echo "Free, MIT-licensed barcode, QR and NFC scanner for Android and iPhone. No account, no"
+            echo "database, no telemetry — scans live in memory for the session and nothing leaves the device."
+            echo
+            echo "### Files"
+            echo
+            echo "| File | Size | For |"
+            echo "|---|---|---|"
+            for f in dist/*; do
+              [ -f "$f" ] || continue
+              case "$(basename "$f")" in
+                *arm64-v8a*) note="64-bit ARM phones (everything released since roughly 2018)" ;;
+                *armeabi-v7a*) note="32-bit ARM phones" ;;
+                *x86_64*) note="emulators, and the occasional Chromebook" ;;
+                *-universal.apk) note="any phone; pick this one if you are not sure" ;;
+                *.aab) note="Google Play upload, not for sideloading" ;;
+                *.ipa) note="iPhone; needs Apple signing material" ;;
+                *) note="" ;;
+              esac
+              printf '| `%s` | %s | %s |\n' "$(basename "$f")" "$(du -h "$f" | cut -f1)" "$note"
+            done
+            echo
+            echo "### Installing on Android"
+            echo
+            echo "Download the APK for your phone and open it. Android asks you to allow installing apps"
+            echo "from this source the first time. An upgrade installs over an older version as long as"
+            echo "both were signed with the same key."
+            echo
+            if [ -d info ] && [ -n "$(ls -A info 2>/dev/null)" ]; then
+              echo "How these files were signed:"
+              echo
+              sed 's/^/- /' info/*.txt
+              echo
+              echo "A debug signature means the build had no release keystore available. Those artifacts"
+              echo "are for testing only, because no other build of the same app would be allowed to"
+              echo "update them."
+              echo
+            fi
+            if [ ! -f "dist/ibe-barcode-scanner-${VERSION}.ipa" ]; then
+              echo "### iPhone"
+              echo
+              echo "No \`.ipa\` in this release: building one needs Apple signing material, which is not"
+              echo "something a repository can carry by default. See \`docs/testing/packaging-and-ci.md\`."
+              echo
+            fi
+            echo "The interface is available in English, Simplified Chinese, Traditional Chinese and Japanese."
+          } > "$notes"
+          cat "$notes"
+
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # There is no checkout in this job, so there is no git remote for gh to read the
+          # repository from.
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_type == 'tag' && github.ref_name || inputs.tag }}
+          REF_TYPE: ${{ github.ref_type }}
+        run: |
+          set -euo pipefail
+          args=( --title "$TAG" --notes-file "$RUNNER_TEMP/release-notes.md" )
+          if [ "$REF_TYPE" != "tag" ]; then
+            # A manual run names a tag that does not exist yet, so point it at this commit.
+            args+=( --target "$GITHUB_SHA" )
+          fi
+          gh release create "$TAG" "${args[@]}" dist/*

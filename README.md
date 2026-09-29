@@ -60,6 +60,8 @@ outstanding are tracked in `docs/testing/device-checklist.md`.
 - `docs/superpowers/specs` — architecture design.
 - `docs/superpowers/plans` — one implementation plan per subsystem.
 - `docs/testing/device-checklist.md` — the manual test matrix for real hardware.
+- `docs/testing/packaging-and-ci.md` — the release artifacts, the signing material and the CI/CD
+  pipelines, including what an iPhone build actually needs.
 
 ## Build and test
 
@@ -79,6 +81,33 @@ dotnet build src/IBEBarcode.Scanner -t:Run -f net10.0-android
 
 See `docs/testing/android-deploy.md` for the Visual Studio 2026 walkthrough and for fixing a phone that
 `adb devices` cannot see.
+
+## Releases
+
+Every push is built by [build.yml](.github/workflows/build.yml): the core tests run on Linux, a
+Release APK is published as a downloadable artifact, and the iOS target is compiled on macOS to
+prove it still builds. Pushing a tag runs [release.yml](.github/workflows/release.yml), which
+attaches installable files to a GitHub Release:
+
+| File | For |
+|---|---|
+| `…-arm64-v8a.apk` | 64-bit ARM phones (26 MB) |
+| `…-armeabi-v7a.apk` | 32-bit ARM phones (26 MB) |
+| `…-x86_64.apk` | emulators and some Chromebooks |
+| `…-universal.apk` | any phone, if you would rather not choose (53 MB) |
+| `….aab` | Google Play upload |
+| `….ipa` | iPhone, when Apple signing material is configured |
+
+```bash
+git tag v1.0.1 && git push origin v1.0.1
+```
+
+Bump `<ApplicationDisplayVersion>` in the project file before tagging. Releases are signed from
+repository secrets when they are configured (see `docs/testing/packaging-and-ci.md` for the
+keystore and the Apple side); without them the APKs are debug-signed and say so, which is fine for
+testing but cannot update an earlier install. A signed iPhone `.ipa` needs an Apple account — a
+free one is enough for a 7-day development build on registered devices, and iOS NFC needs the paid
+program.
 
 ## Format support
 

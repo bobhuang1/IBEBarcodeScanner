@@ -38,7 +38,21 @@
 			armeabi-v7a binaries, so android-arm is a working ABI: without it, deploy fails with
 			ADB0020 "The package does not support the CPU architecture of this device".
 		-->
-		<RuntimeIdentifiers Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">android-arm;android-arm64;android-x64</RuntimeIdentifiers>
+		<RuntimeIdentifiers Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android' And '$(AndroidAbi)' == ''">android-arm;android-arm64;android-x64</RuntimeIdentifiers>
+
+		<!--
+			Single-ABI packaging, for the release pipeline: `dotnet publish -f net10.0-android
+			-p:AndroidAbi=android-arm64` produces an APK carrying only that ABI's native libraries.
+
+			It cannot be done by passing -p:RuntimeIdentifier directly. RuntimeIdentifier is a global
+			MSBuild property, so it is handed to every referenced project too; IBEBarcode.Scanner.Core
+			targets plain net10.0, where android-arm resolves through the RID graph to linux-bionic-arm
+			and restore fails with NU1101: Unable to find package
+			Microsoft.NETCore.App.Runtime.linux-bionic-arm. Routing the value through a property only
+			this project understands keeps the ABI choice where it belongs.
+		-->
+		<RuntimeIdentifiers Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android' And '$(AndroidAbi)' != ''">$(AndroidAbi)</RuntimeIdentifiers>
+		<RuntimeIdentifier Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android' And '$(AndroidAbi)' != ''">$(AndroidAbi)</RuntimeIdentifier>
 
 		<!--
 			Fast deployment (the default in Debug) leaves the assemblies out of the APK and pushes them to

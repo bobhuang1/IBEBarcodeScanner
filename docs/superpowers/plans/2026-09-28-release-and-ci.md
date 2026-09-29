@@ -6,10 +6,12 @@
 **Goal:** Make the repository build itself on every push, and get the app to the point where store submission
 is a signing-and-metadata exercise rather than an engineering one.
 
-**Architecture:** GitHub Actions with three jobs — tests, Android build, iOS build — deliberately split so the
-two platform-specific compilations fail independently. There is no server, no database and no deployment
-step: the artifacts are an APK/AAB and an iOS archive produced from a signing configuration that stays in
-repository secrets.
+**Architecture:** GitHub Actions. `build.yml` has three jobs — tests, Android build, iOS build — deliberately
+split so the two platform-specific compilations fail independently. `release.yml` turns a `v*` tag into
+installable files: three per-ABI APKs, a universal APK and a Play bundle, plus an iOS IPA, attached to a GitHub
+Release. There is no server, no database and no deployment step: the artifacts are produced from a signing
+configuration that stays in repository secrets, and every signing property is optional so a fork or a fresh
+clone can still build.
 
 **Spec:** `docs/superpowers/specs/2026-09-28-ibe-barcode-scanner-design.md`
 
@@ -65,12 +67,37 @@ repository secrets.
 - [ ] Decide whether to publish to Chinese app stores (separate onboarding, and a China-specific note about
       Google Play services being unavailable, which affects the Android camera path on some devices there).
 
+### Task 5: Packaging and CI/CD — WORKFLOWS DONE, CREDENTIALS OUTSTANDING
+
+**Files:** `.github/workflows/build.yml`, `.github/workflows/release.yml`,
+`src/IBEBarcode.Scanner/IBEBarcode.Scanner.csproj`, `docs/testing/packaging-and-ci.md`
+
+- [x] `-p:AndroidAbi` in the project file, so one ABI can be packaged per build without leaking a
+      `RuntimeIdentifier` global property into `IBEBarcode.Scanner.Core` (which fails restore with NU1101).
+      Verified for `android-arm` and `android-arm64`: 25.9 MB and 26.1 MB APKs, each carrying one ABI.
+- [x] `release.yml`: five Android flavors (three ABIs, universal, bundle) plus the iOS IPA, each artifact
+      named for what it is, signed from repository secrets when they exist and debug-signed with a warning
+      when they do not, and attached to a GitHub Release on a `v*` tag.
+- [x] `build.yml`: pushes still get tests, an Android build and a simulator iOS build, and the Android job now
+      uploads an installable APK so a build can reach a phone without a local toolchain. Xcode pinned in both
+      workflows so a runner image update cannot silently move it.
+- [ ] Create the release keystore and set `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`,
+      `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`. Until then every APK is debug-signed and cannot update the
+      last one.
+- [ ] Set the five `IOS_*` secrets (a free Apple ID is enough for a 7-day development build) and confirm a
+      signed `.ipa` comes out.
+- [ ] Push the repository to GitHub and watch the first run of both workflows. Nothing in either has executed
+      yet, so the workload identifiers, the `macos-26` image contents and the Xcode version are all still
+      assumptions.
+
 ## Verification
 
 ```bash
 dotnet test                                 # the CI test job, locally
 dotnet build src/IBEBarcode.Scanner -f net10.0-android -c Release
+dotnet build src/IBEBarcode.Scanner -f net10.0-ios -c Release -p:RuntimeIdentifier=iossimulator-arm64
 ```
 
 The workflows are committed but have not run: this repository has no remote yet. The first push is the moment
-to confirm the workload identifiers and macOS runner image still match what the jobs assume.
+to confirm the workload identifiers and macOS runner image still match what the jobs assume. The packaging
+matrix, the signing rules and the iOS constraints are written up in `docs/testing/packaging-and-ci.md`.

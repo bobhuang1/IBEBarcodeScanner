@@ -54,11 +54,11 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      # The full maui workload, not just maui-android: MSBuild evaluates both TargetFrameworks
-      # of the app project on every build, so the Linux job needs the iOS workload manifest
-      # present as well (NETSDK1178 otherwise), even though only the Android packs are used.
-      - name: Install MAUI workload
-        run: dotnet workload install maui
+      # maui-android (not the full maui workload): the monolithic maui is not installable on
+      # Linux. The app project is built with -p:AndroidOnly=true below so it never evaluates
+      # the iOS target, which would demand the iOS workload manifest this OS cannot install.
+      - name: Install MAUI Android workload
+        run: dotnet workload install maui-android
 
       # If the release keystore is configured, use it even for a push build: APKs signed with the
       # same key install over each other, while each runner gets a fresh debug keystore, so
@@ -83,6 +83,7 @@ jobs:
           set -euo pipefail
           args=(
             -f net10.0-android
+            -p:AndroidOnly=true
             -c Release
             -o dist
             -p:AndroidPackageFormat=apk

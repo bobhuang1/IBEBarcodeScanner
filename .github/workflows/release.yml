@@ -117,9 +117,10 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Install the Android workload
-        # Full maui, not maui-android: the project multi-targets iOS too and MSBuild evaluates
-        # both TFMs, so the iOS manifest must exist even on this Android-only build (NETSDK1178).
-        run: dotnet workload install maui
+        # maui-android, because the monolithic maui is not installable on Linux. The publish
+        # below passes -p:AndroidOnly=true so the project never evaluates the iOS target, which
+        # would demand the iOS workload manifest this OS cannot install (NETSDK1178).
+        run: dotnet workload install maui-android
 
       # The keystore is written to the runner's temp directory, never into the checkout, and the
       # passwords go into files so MSBuild can be handed them with the file: prefix instead of
@@ -144,6 +145,7 @@ jobs:
           set -euo pipefail
           args=(
             -f net10.0-android
+            -p:AndroidOnly=true
             -c Release
             -o dist
             -p:AndroidPackageFormat=${{ matrix.format }}
@@ -226,27 +228,13 @@ jobs:
     name: iOS IPA
     needs: [tests, version]
     # Apple's toolchain is macOS-only, which is why this job cannot sit on the same runner as the
-    # Android ones. macos-26 is Apple silicon, and is what macos-latest currently points at.
-    runs-on: macos-26
+    # Android ones. The Xcode 27 image, not macos-26: the .NET for iOS workload resolves the
+    # newest SDK band (27.0), which hard-requires Xcode 27 (see build.yml's iOS job).
+    runs-on: xcode-27
     env:
       HAS_IOS_SIGNING: ${{ secrets.IOS_CERTIFICATE_P12_BASE64 != '' }}
     steps:
       - uses: actions/checkout@v4
-
-      # Pinned rather than left to the image default: the .NET for iOS workload is bound to a
-      # specific Xcode SDK band, and an image update that moves the default Xcode is enough to
-      # break the build for reasons that have nothing to do with this code.
-      - name: Select Xcode
-        run: |
-          set -euo pipefail
-          for candidate in /Applications/Xcode_26.6.app /Applications/Xcode_26.5.app; do
-            if [ -d "$candidate" ]; then
-              sudo xcode-select -s "$candidate"
-              break
-            fi
-          done
-          xcodebuild -version
-          xcode-select -p
 
       - uses: actions/setup-dotnet@v4
         with:

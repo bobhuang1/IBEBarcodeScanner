@@ -2,7 +2,14 @@
 
 	<PropertyGroup>
 		<!-- Mobile only: iOS and Android, as the requirements specify. -->
-		<TargetFrameworks>net10.0-android;net10.0-ios</TargetFrameworks>
+		<!--
+			AndroidOnly=true (used by the Linux CI jobs) evaluates only the Android target:
+			MSBuild imports workload manifests for every TFM listed here, so the iOS entry
+			would demand the iOS workload manifest on a machine that cannot install it
+			(NETSDK1178) even though only net10.0-android is being built.
+		-->
+		<TargetFrameworks Condition="'$(AndroidOnly)' != 'true'">net10.0-android;net10.0-ios</TargetFrameworks>
+		<TargetFrameworks Condition="'$(AndroidOnly)' == 'true'">net10.0-android</TargetFrameworks>
 
 		<OutputType>Exe</OutputType>
 		<RootNamespace>IBEBarcode.Scanner</RootNamespace>

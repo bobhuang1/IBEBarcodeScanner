@@ -1,6 +1,6 @@
 # IBE Barcode Scanner
 
-Free, open-source (MIT) iOS and Android app that scans printed barcodes, QR codes
+Free, open-source (GPL-3.0) iOS and Android app that scans printed barcodes, QR codes
 and NFC tags — the companion of
 [IBE Barcode Generator](../IBEBarcodeGeneratror). It reads every format the
 generator can print that phone hardware is capable of reading, and holds the

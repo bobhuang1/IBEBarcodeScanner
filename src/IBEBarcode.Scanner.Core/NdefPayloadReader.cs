@@ -125,7 +125,9 @@ public static class NdefPayloadReader
                 idLength = message[offset++];
             }
 
-            if (offset + typeLength + idLength + payloadLength > message.Length)
+            // In long arithmetic: a long record's payload length can be up to 2^31-1, and
+            // the int sum would overflow to a negative number and pass this check.
+            if ((long)offset + typeLength + idLength + payloadLength > message.Length)
                 break;
 
             var type = message.Slice(offset, typeLength).ToArray();

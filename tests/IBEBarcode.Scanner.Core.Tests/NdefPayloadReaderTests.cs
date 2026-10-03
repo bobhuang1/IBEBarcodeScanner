@@ -149,6 +149,17 @@ public class NdefPayloadReaderTests
         return BuildRecord(0x01, "T", payload.ToArray());
     }
 
+    [Fact]
+    public void Read_LongRecordWithHugePayloadLength_IsRejectedWithoutThrowing()
+    {
+        // MB|ME, long record (SR clear), TNF well-known; payload length 0x7FFFFFFF.
+        byte[] message = [0xC1, 0x01, 0x7F, 0xFF, 0xFF, 0xFF, (byte)'U', 0x04, (byte)'a'];
+
+        var payload = NdefPayloadReader.Read(message);
+
+        Assert.Null(payload);
+    }
+
     private static byte[] BuildRecord(byte tnf, string type, byte[] payload)
     {
         var typeBytes = Encoding.ASCII.GetBytes(type);

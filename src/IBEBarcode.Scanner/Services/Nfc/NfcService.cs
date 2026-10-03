@@ -70,7 +70,18 @@ public sealed class NfcService
             return;
         }
 
-        var payload = NdefPayloadReader.Read(read.NdefMessage);
+        NdefPayload? payload;
+        try
+        {
+            payload = NdefPayloadReader.Read(read.NdefMessage);
+        }
+        catch (Exception)
+        {
+            // A malformed or hostile tag must not crash the app.
+            SetStatus(NfcReadStatus.Unreadable);
+            return;
+        }
+
         var result = ScanResultFactory.FromNdef(payload, DateTimeOffset.Now);
 
         if (result is null)

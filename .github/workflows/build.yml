@@ -40,6 +40,16 @@ jobs:
       - name: Test
         run: dotnet test tests/IBEBarcode.Scanner.Core.Tests --configuration Release
 
+      # The artifact budget's own tests: they pin the guard's verdicts and assert
+      # that every upload in both workflows is measured before it stores anything,
+      # which is the part that keeps a new upload from arriving unbudgeted. PyYAML
+      # reads the workflow files; the image normally has it, and installing it is
+      # cheaper than skipping the wiring check.
+      - name: Test the artifact budget guard
+        run: |
+          python3 -c 'import yaml' || pip3 install --quiet pyyaml
+          bash scripts/artifact-budget.test.sh
+
   android:
     name: Android build
     runs-on: ubuntu-latest
@@ -104,8 +114,37 @@ jobs:
           dotnet publish "$PROJECT" "${args[@]}"
           mv dist/*-Signed.apk "ibe-barcode-scanner-${{ github.sha }}.apk"
 
+      # Artifact storage is one 500 MB meter for the whole account, not a quota per
+      # repository (see the header of `scripts/artifact-budget.mjs`): a sibling
+      # repository's 436.8 MB desktop build per run is what spent it, and this
+      # APK went unstoreable for weeks as a result. So the upload below is
+      # measured first. A fifth of the month is 100 MiB, which a 51.8 MB APK fits
+      # inside with room — this is not meant to stop a normal build, it is meant
+      # to catch the build that starts packing something unexpected, and to keep
+      # this repository from being the one that refills the meter quietly.
+      #
+      # Only an over-budget verdict (exit 1) is downgraded to a warning. A usage
+      # error still fails the job, because a guard that cannot measure must not
+      # read as "inside the budget".
+      - name: Check the artifact budget
+        id: budget
+        run: |
+          set -euo pipefail
+          status=0
+          node scripts/artifact-budget.mjs \
+            --label android-apk \
+            --budget-mb 100 \
+            --retention-days 14 \
+            "ibe-barcode-scanner-*.apk" || status=$?
+          if [ "$status" -eq 1 ]; then
+            echo "::warning title=Artifact budget::The APK was not stored: it is over this run's 100 MiB share of the account's artifact allowance."
+          elif [ "$status" -ne 0 ]; then
+            exit "$status"
+          fi
+
       - name: Upload the APK
         uses: actions/upload-artifact@v4
+        if: steps.budget.outputs.over-budget != 'true'
         with:
           name: android-apk
           if-no-files-found: error

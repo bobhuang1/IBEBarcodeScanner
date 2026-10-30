@@ -163,7 +163,7 @@ Two options exist for the cases where the defaults do not fit, both set as repos
 | Job | Runner | Result |
 |---|---|---|
 | tests | ubuntu | `dotnet test` on the Core suite |
-| android | ubuntu | Release APK (all ABIs), release-signed when the keystore secrets exist, uploaded as `android-apk` (14 days) |
+| android | ubuntu | Release APK (all ABIs), release-signed when the keystore secrets exist, budgeted and then uploaded as `android-apk` (14 days) |
 | ios | macos-26 | simulator build, Xcode pinned, no signing material, nothing uploaded |
 
 `release.yml` — tags matching `v*`, or a manual run:
@@ -190,6 +190,34 @@ Public repositories have no minute quota. On a private repository macOS jobs con
 minutes at roughly 10× the Linux rate, so a release (5 short Ubuntu jobs, one ~20-minute macOS job)
 costs on the order of 200 of the 2000 minutes a free private plan includes — a handful of releases
 a month is not a problem, a release per push would be.
+
+### Artifact storage: the meter that is not per-repository
+
+Minutes are not the only thing an upload costs. GitHub artifact storage is **one 500 MB monthly
+allowance for the whole account**, shared with `IBEBarcodeGenerator`, `OmniRetail` and everything
+else the owner has, and it is metered in GB-hours: 500 MB held for a month. Once it is spent,
+every repository's uploads are refused with `Failed to CreateArtifact: Artifact storage quota has
+been hit` until the cycle resets, however little storage that repository was using — which is how
+this repository's APK uploads stopped working in October while a sibling repository's 436.8 MB
+desktop build per run (held seven days, three runs in two days) spent the allowance.
+
+So both workflows run `scripts/artifact-budget.mjs` immediately before each `upload-artifact`
+step. It sums every byte of the files about to be stored, prints their share of the month and
+their GB-hour cost at the step's retention, and writes `over-budget=true|false` for the upload step
+to read. A budget overrun skips the upload and emits a warning annotation naming the overage; a
+failure to measure (a usage error) fails the job instead, because a guard that cannot measure must
+not read as "inside the budget".
+
+| Upload | Budget | Why |
+|---|---|---|
+| `android-apk` in `build.yml` | 100 MiB | a fifth of the month, which the 51.8 MB APK fits inside with room; a push that blows past it is packing something unexpected |
+| `android-*` in `release.yml` | 200 MiB per flavor | a release is the run whose files ARE the product; the cap catches one flavor ballooning rather than arguing with a release (~179 MB for the whole thing) |
+| `ios-ipa` in `release.yml` | 200 MiB | same; a missing IPA is a configuration state and passes as "not found" |
+
+`scripts/artifact-budget.test.sh` pins the guard's verdicts and asserts that every
+`upload-artifact` step in both workflows is preceded by a budget step, reads its verdict, and
+states a retention inside two weeks. `build.yml`'s tests job runs it, so a new upload cannot
+arrive unmeasured.
 
 ## First-run expectations
 

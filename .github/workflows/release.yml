@@ -215,10 +215,39 @@ jobs:
           fi
           cat "signing-info-${{ matrix.label }}.txt"
 
+      # A release is the one run whose files ARE the product, so the cap here is
+      # deliberately loose — 200 MiB per flavor, where a full release runs about
+      # 178.9 MB and takes under a tenth of the month at 7 days. It is not there
+      # to argue with a release; it is there so a flavor that suddenly packs
+      # 800 MB says so, and so the cost of each declared before the meter is
+      # drawn on (see the header of `scripts/artifact-budget.mjs` for why the
+      # account's 500 MB is a single meter rather than a per-repository one).
+      - name: Check the artifact budget
+        id: budget
+        run: |
+          set -euo pipefail
+          status=0
+          node scripts/artifact-budget.mjs \
+            --label "android-${{ matrix.label }}" \
+            --budget-mb 200 \
+            --retention-days 7 \
+            ibe-barcode-scanner-* \
+            "signing-info-${{ matrix.label }}.txt" || status=$?
+          if [ "$status" -eq 1 ]; then
+            echo "::warning title=Artifact budget::android-${{ matrix.label }} was not stored: it is over this artifact's 200 MiB share of the account's artifact allowance."
+          elif [ "$status" -ne 0 ]; then
+            exit "$status"
+          fi
+
       - name: Upload
         uses: actions/upload-artifact@v4
+        # Skipped when the budget says no: the release job downloads these, so a
+        # missing flavor shows up there as a release missing a file rather than
+        # as a quota error in this run.
+        if: steps.budget.outputs.over-budget != 'true'
         with:
           name: android-${{ matrix.label }}
+          retention-days: 7
           if-no-files-found: error
           path: |
             ibe-barcode-scanner-*
@@ -354,13 +383,32 @@ jobs:
           done
           ls -la ./*.ipa || echo "no .ipa to collect"
 
+      - name: Check the artifact budget
+        id: budget
+        run: |
+          set -euo pipefail
+          status=0
+          node scripts/artifact-budget.mjs \
+            --label ios-ipa \
+            --budget-mb 200 \
+            --retention-days 7 \
+            "ibe-barcode-scanner-*.ipa" || status=$?
+          if [ "$status" -eq 1 ]; then
+            echo "::warning title=Artifact budget::The .ipa was not stored: it is over this artifact's 200 MiB share of the account's artifact allowance."
+          elif [ "$status" -ne 0 ]; then
+            exit "$status"
+          fi
+
       - name: Upload
         uses: actions/upload-artifact@v4
+        if: steps.budget.outputs.over-budget != 'true'
         with:
           name: ios-ipa
           # A missing IPA is a configuration state, not a broken build; the step summary above
-          # explains it.
+          # explains it. It is also the normal case when no signing material is configured, in
+          # which case the budget step above reports the path as not found and passes.
           if-no-files-found: warn
+          retention-days: 7
           path: ibe-barcode-scanner-*.ipa
 
   release:

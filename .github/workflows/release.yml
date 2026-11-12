@@ -38,9 +38,9 @@ jobs:
     name: Core tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
         with:
           dotnet-version: '10.0.x'
 
@@ -56,7 +56,7 @@ jobs:
       display: ${{ steps.read.outputs.display }}
       code: ${{ steps.read.outputs.code }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       # ApplicationDisplayVersion comes from the project file, which is the one thing to bump
       # before tagging. The version *code* is the run number: Android needs it to increase with
@@ -110,9 +110,9 @@ jobs:
     env:
       HAS_ANDROID_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
         with:
           dotnet-version: '10.0.x'
 
@@ -141,6 +141,10 @@ jobs:
         env:
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           LABEL: ${{ matrix.label }}
+          FORMAT: ${{ matrix.format }}
+          ABI: ${{ matrix.abi }}
+          DISPLAY_VERSION: ${{ needs.version.outputs.display }}
+          VERSION_CODE: ${{ needs.version.outputs.code }}
         run: |
           set -euo pipefail
           args=(
@@ -148,12 +152,12 @@ jobs:
             -p:AndroidOnly=true
             -c Release
             -o dist
-            -p:AndroidPackageFormat=${{ matrix.format }}
-            -p:ApplicationDisplayVersion=${{ needs.version.outputs.display }}
-            -p:ApplicationVersion=${{ needs.version.outputs.code }}
+            "-p:AndroidPackageFormat=$FORMAT"
+            "-p:ApplicationDisplayVersion=$DISPLAY_VERSION"
+            "-p:ApplicationVersion=$VERSION_CODE"
           )
-          if [ -n "${{ matrix.abi }}" ]; then
-            args+=( -p:AndroidAbi=${{ matrix.abi }} )
+          if [ -n "$ABI" ]; then
+            args+=( "-p:AndroidAbi=$ABI" )
           fi
 
           if [ "$HAS_ANDROID_KEYSTORE" = "true" ]; then
@@ -240,7 +244,7 @@ jobs:
           fi
 
       - name: Upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         # Skipped when the budget says no: the release job downloads these, so a
         # missing flavor shows up there as a release missing a file rather than
         # as a quota error in this run.
@@ -263,9 +267,9 @@ jobs:
     env:
       HAS_IOS_SIGNING: ${{ secrets.IOS_CERTIFICATE_P12_BASE64 != '' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
         with:
           dotnet-version: '10.0.x'
 
@@ -320,6 +324,8 @@ jobs:
         env:
           CODESIGN_KEY: ${{ secrets.IOS_CODESIGN_KEY }}
           PROVISIONING_PROFILE_NAME: ${{ secrets.IOS_PROVISIONING_PROFILE_NAME }}
+          DISPLAY_VERSION: ${{ needs.version.outputs.display }}
+          VERSION_CODE: ${{ needs.version.outputs.code }}
         run: |
           set -euo pipefail
           dotnet publish "$PROJECT" \
@@ -329,8 +335,8 @@ jobs:
             -p:RuntimeIdentifier=ios-arm64 \
             -p:CodesignKey="$CODESIGN_KEY" \
             -p:CodesignProvision="$PROVISIONING_PROFILE_NAME" \
-            -p:ApplicationDisplayVersion=${{ needs.version.outputs.display }} \
-            -p:ApplicationVersion=${{ needs.version.outputs.code }}
+            "-p:ApplicationDisplayVersion=$DISPLAY_VERSION" \
+            "-p:ApplicationVersion=$VERSION_CODE"
 
       # Best effort, and off unless asked for: an unsigned .ipa is only useful to somebody who
       # re-signs it themselves (Sideloadly, AltStore, a jailbroken device). iOS will not install
@@ -400,7 +406,7 @@ jobs:
           fi
 
       - name: Upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: steps.budget.outputs.over-budget != 'true'
         with:
           name: ios-ipa
@@ -421,7 +427,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           path: dist
           merge-multiple: true

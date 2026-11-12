@@ -45,8 +45,25 @@ public static partial class FrameGrabber
     {
         try
         {
+            // A 48-108 MP phone photo is hundreds of MB as ARGB, so read the size first (no pixels are
+            // allocated) and let the decoder subsample while it decodes.
+            using var bounds = new BitmapFactory.Options { InJustDecodeBounds = true };
+            await using (var boundsStream = await file.OpenReadAsync())
+            {
+                BitmapFactory.DecodeStream(boundsStream, null, bounds);
+            }
+
+            if (bounds.OutWidth <= 0 || bounds.OutHeight <= 0)
+                return null;
+
+            var sampleSize = 1;
+            var longEdge = Math.Max(bounds.OutWidth, bounds.OutHeight);
+            while (longEdge / (sampleSize * 2) >= MaxWorkingWidth)
+                sampleSize *= 2;
+
+            using var options = new BitmapFactory.Options { InSampleSize = sampleSize };
             await using var stream = await file.OpenReadAsync();
-            using var bitmap = await BitmapFactory.DecodeStreamAsync(stream);
+            using var bitmap = BitmapFactory.DecodeStream(stream, null, options);
             return bitmap is null ? null : FromBitmap(bitmap);
         }
         catch (Exception)
@@ -64,10 +81,11 @@ public static partial class FrameGrabber
             return null;
 
         // Shrink first: decoding a 12MP frame is wasted work when the decoders only need bar geometry.
-        if (width > MaxWorkingWidth)
+        var longEdge = Math.Max(width, height);
+        if (longEdge > MaxWorkingWidth)
         {
-            var scale = (double)MaxWorkingWidth / width;
-            width = MaxWorkingWidth;
+            var scale = (double)MaxWorkingWidth / longEdge;
+            width = Math.Max(1, (int)(bitmap.Width * scale));
             height = Math.Max(1, (int)(bitmap.Height * scale));
         }
 

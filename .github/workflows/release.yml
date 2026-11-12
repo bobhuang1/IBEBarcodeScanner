@@ -273,6 +273,17 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      # .NET for iOS ships new workload versions that require the newest Xcode (for example
+      # 27.2), while the image may still default to an older one. Select the newest Xcode
+      # installed on the image so the workload and Xcode match.
+      - name: Select the newest installed Xcode
+        run: |
+          set -euo pipefail
+          ls -d /Applications/Xcode*.app
+          newest=$(ls -d /Applications/Xcode_*.app | sort -V | tail -n 1)
+          sudo xcode-select -s "$newest/Contents/Developer"
+          xcodebuild -version
+
       - name: Install the MAUI workload
         run: dotnet workload install maui
 

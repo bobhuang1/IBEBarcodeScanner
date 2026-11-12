@@ -158,4 +158,23 @@ public class Gs1AiParserTests
     {
         Assert.False(Gs1AiParser.LooksLikeGs1(text));
     }
+
+    [Fact]
+    public void Parse_ShipToAddressAi_IsVariableLengthUpToSeventyCharacters()
+    {
+        var address = new string('A', 50);
+
+        var elements = Gs1AiParser.Parse("4302" + address + "10LOT");
+
+        Assert.Equal(["4302", "10"], elements.Select(e => e.Ai).ToArray());
+        Assert.Equal(address, elements[0].Value);
+    }
+
+    [Fact]
+    public void Parse_ShipToCountryCode_StaysTwoCharacters()
+    {
+        var elements = Gs1AiParser.Parse("4307GB10LOT");
+
+        Assert.Equal(["4307", "10"], elements.Select(e => e.Ai).ToArray());
+    }
 }

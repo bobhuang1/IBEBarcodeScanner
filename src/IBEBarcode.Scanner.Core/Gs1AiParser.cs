@@ -13,7 +13,8 @@ public static class Gs1AiParser
     private sealed record AiInfo(int FixedLength, string Description);
 
     // FixedLength > 0 means the element has that exact length and needs no separator after it.
-    // FixedLength == 0 means variable length, terminated by the group separator.
+    // FixedLength == 0 means variable length, terminated by the group separator (ship-to AIs 4300-4306
+    // and 4308 are variable up to 35/70/30 characters per the GS1 General Specifications).
     private static readonly Dictionary<string, AiInfo> KnownAis = new(StringComparer.Ordinal)
     {
         ["00"] = new(18, "SSCC"),
@@ -61,15 +62,15 @@ public static class Gs1AiParser
         ["425"] = new(3, "Country of disassembly"),
         ["426"] = new(3, "Country of full process chain"),
         ["427"] = new(0, "Subdivision of country of origin"),
-        ["4300"] = new(35, "Ship-to company name"),
-        ["4301"] = new(35, "Ship-to name"),
-        ["4302"] = new(35, "Ship-to address line 1"),
-        ["4303"] = new(35, "Ship-to address line 2"),
-        ["4304"] = new(35, "Ship-to suburb"),
-        ["4305"] = new(35, "Ship-to locality"),
-        ["4306"] = new(35, "Ship-to region"),
+        ["4300"] = new(0, "Ship-to company name"),
+        ["4301"] = new(0, "Ship-to name"),
+        ["4302"] = new(0, "Ship-to address line 1"),
+        ["4303"] = new(0, "Ship-to address line 2"),
+        ["4304"] = new(0, "Ship-to suburb"),
+        ["4305"] = new(0, "Ship-to locality"),
+        ["4306"] = new(0, "Ship-to region"),
         ["4307"] = new(2, "Ship-to country code"),
-        ["4308"] = new(35, "Ship-to telephone number"),
+        ["4308"] = new(0, "Ship-to telephone number"),
         ["7001"] = new(13, "NATO stock number"),
         ["7002"] = new(0, "Meat cut classification"),
         ["7003"] = new(10, "Expiration date and time"),

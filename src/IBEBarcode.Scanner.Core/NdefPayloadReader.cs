@@ -71,7 +71,13 @@ public static class NdefPayloadReader
     ];
 
     /// <summary>Returns null when the bytes are not a readable NDEF message.</summary>
-    public static NdefPayload? Read(ReadOnlySpan<byte> message)
+    public static NdefPayload? Read(ReadOnlySpan<byte> message) => Read(message, 0);
+
+    // A Smart Poster carries a whole NDEF message in its payload; the depth cap keeps a crafted tag
+    // from nesting posters inside posters.
+    private const int MaxNestingDepth = 4;
+
+    private static NdefPayload? Read(ReadOnlySpan<byte> message, int depth)
     {
         if (message.Length < 3)
             return null;
@@ -79,6 +85,7 @@ public static class NdefPayloadReader
         var records = new List<NdefRecordPayload>();
         var offset = 0;
         var chunkedPayload = new List<byte>();
+        var inChunk = false;
         byte[]? chunkType = null;
         byte chunkTnf = 0;
 
@@ -140,26 +147,29 @@ public static class NdefPayloadReader
 
             if (isChunked)
             {
-                // First chunk of a record: its type and TNF apply to the whole record.
-                if (chunkedPayload.Count == 0)
+                // First chunk of a record: its type and TNF apply to the whole record. Tracked with a flag
+                // rather than the byte count, because the first chunk's payload may legitimately be empty.
+                if (!inChunk)
                 {
+                    inChunk = true;
                     chunkType = type;
                     chunkTnf = tnf;
                 }
 
                 chunkedPayload.AddRange(payload);
             }
-            else if (chunkedPayload.Count > 0)
+            else if (inChunk)
             {
                 // Final chunk: type length is zero and this completes the record.
                 chunkedPayload.AddRange(payload);
-                records.Add(DecodeRecord(chunkTnf, chunkType ?? [], chunkedPayload.ToArray()));
+                records.Add(DecodeRecord(chunkTnf, chunkType ?? [], chunkedPayload.ToArray(), depth));
                 chunkedPayload.Clear();
                 chunkType = null;
+                inChunk = false;
             }
             else
             {
-                records.Add(DecodeRecord(tnf, type, payload));
+                records.Add(DecodeRecord(tnf, type, payload, depth));
             }
 
             if (isMessageEnd)
@@ -169,7 +179,7 @@ public static class NdefPayloadReader
         return records.Count == 0 ? null : new NdefPayload(records);
     }
 
-    private static NdefRecordPayload DecodeRecord(byte tnf, byte[] type, byte[] payload)
+    private static NdefRecordPayload DecodeRecord(byte tnf, byte[] type, byte[] payload, int depth)
     {
         var typeName = Encoding.ASCII.GetString(type);
 
@@ -178,6 +188,17 @@ public static class NdefPayloadReader
             case 0x01 when typeName == "U":
                 var uriText = DecodeUriText(payload);
                 return new NdefRecordPayload(tnf, typeName, uriText, ToOpenableLink(uriText), null);
+
+            case 0x01 when typeName == "Sp" && depth < MaxNestingDepth:
+                // Smart Poster: the payload is itself an NDEF message (URI record plus optional title).
+                var poster = Read(payload, depth + 1);
+                if (poster is not null && !poster.IsEmpty)
+                {
+                    var language = poster.Records.FirstOrDefault(r => r.LanguageCode is not null)?.LanguageCode;
+                    return new NdefRecordPayload(tnf, typeName, poster.Text, poster.Uri, language);
+                }
+
+                break;
 
             case 0x01 when typeName == "T":
                 return DecodeText(tnf, typeName, payload);

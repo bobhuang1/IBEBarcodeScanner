@@ -230,4 +230,15 @@ public class GrayImageTests
 
         Assert.Equal(130, image.RowThreshold(0));
     }
+
+    [Fact]
+    public void DownscaleToWidth_BoundsTheLongEdgeOfATallNarrowImage()
+    {
+        var image = new GrayImage(100, 4000, new byte[100 * 4000]);
+
+        var scaled = image.DownscaleToWidth(1600);
+
+        Assert.Equal(1600, scaled.Height);
+        Assert.Equal(40, scaled.Width);
+    }
 }

@@ -134,4 +134,27 @@ public class PayloadClassifierTests
     {
         Assert.Equal("(01)123 (10)ABC", PayloadClassifier.ToDisplayText("(01)123\u001D(10)ABC"));
     }
+
+    [Theory]
+    [InlineData("11 Oak Street")]
+    [InlineData("2000 Main St")]
+    public void Classify_AddressText_StaysText(string text)
+    {
+        var result = PayloadClassifier.Classify(text, BarcodeSymbology.QrCode);
+
+        Assert.Equal(ScanKind.Text, result.Kind);
+        Assert.Equal(text, result.NormalizedText);
+    }
+
+    [Theory]
+    [InlineData("readme.md")]
+    [InlineData("invoice.pdf")]
+    [InlineData("photo.jpg")]
+    public void Classify_FileName_IsNotALink(string text)
+    {
+        var result = PayloadClassifier.Classify(text, BarcodeSymbology.QrCode);
+
+        Assert.Equal(ScanKind.Text, result.Kind);
+        Assert.False(result.CanOpenLink);
+    }
 }

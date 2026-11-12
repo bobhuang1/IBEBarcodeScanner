@@ -28,6 +28,16 @@ public static class PayloadClassifier
 {
     private static readonly string[] OpenableSchemes = ["http", "https"];
 
+    // File extensions that are also real top-level domains (.md, .py, .sh, .zip, .mov ...). A scheme-less
+    // value ending in one of these ("readme.md", "invoice.pdf") is far more likely a file name than a
+    // site, so it is only treated as a link when it starts with "www.".
+    private static readonly HashSet<string> FileLikeSuffixes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "md", "pdf", "txt", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "csv", "rtf", "json", "xml",
+        "jpg", "jpeg", "png", "gif", "bmp", "svg", "zip", "exe", "dll", "bat", "sh", "py", "js", "cs",
+        "css", "log", "ini", "mp3", "mp4", "mov", "wav", "html", "htm",
+    };
+
     public static PayloadClassification Classify(
         string? text,
         BarcodeSymbology symbology = BarcodeSymbology.Unknown,
@@ -207,6 +217,9 @@ public static class PayloadClassifier
 
         var tld = host[(host.LastIndexOf('.') + 1)..];
         if (tld.Length < 2 || !tld.All(char.IsAsciiLetter))
+            return false;
+
+        if (FileLikeSuffixes.Contains(tld) && !host.StartsWith("www.", StringComparison.OrdinalIgnoreCase))
             return false;
 
         return Uri.TryCreate($"https://{value}", UriKind.Absolute, out url);

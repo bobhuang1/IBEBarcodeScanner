@@ -175,13 +175,13 @@ public class NdefPayloadReaderTests
         return message.ToArray();
     }
 
-    private static byte[] BuildChunk(byte[] payload, bool isFirst)
+    private static byte[] BuildChunk(byte[] payload, bool isFirst, string type = "U")
     {
         var message = new List<byte>();
 
         if (isFirst)
         {
-            var typeBytes = Encoding.ASCII.GetBytes("U");
+            var typeBytes = Encoding.ASCII.GetBytes(type);
             message.Add(0x80 | 0x20 | 0x10 | 0x01);
             message.Add((byte)typeBytes.Length);
             message.Add((byte)payload.Length);
@@ -194,6 +194,51 @@ public class NdefPayloadReaderTests
             message.Add((byte)payload.Length);
         }
 
+        message.AddRange(payload);
+        return message.ToArray();
+    }
+
+    [Fact]
+    public void Read_SmartPoster_ReturnsTheNestedUri()
+    {
+        var uriRecord = BuildUriRecord(0x04, "example.com/poster");
+        // The inner message is a single record, so clear MB/ME handling is the inner reader's job.
+        var message = BuildRecord(0x01, "Sp", uriRecord);
+
+        var payload = NdefPayloadReader.Read(message);
+
+        Assert.NotNull(payload);
+        Assert.Equal("https://example.com/poster", payload!.Uri!.ToString());
+        Assert.Equal("Sp", payload.Records[0].Type);
+        Assert.DoesNotContain('�', payload.Text!);
+    }
+
+    [Fact]
+    public void Read_ChunkedRecordWithEmptyFirstChunk_KeepsTypeFromTheFirstChunk()
+    {
+        var textPayload = new List<byte> { 0x02 };
+        textPayload.AddRange(Encoding.ASCII.GetBytes("en"));
+        textPayload.AddRange(Encoding.UTF8.GetBytes("hello"));
+        var all = textPayload.ToArray();
+
+        var message = new List<byte>();
+        message.AddRange(BuildChunk(all.Take(0).ToArray(), isFirst: true, type: "T"));
+        message.AddRange(BuildMiddleChunk(all.Take(4).ToArray()));
+        message.AddRange(BuildChunk(all.Skip(4).ToArray(), isFirst: false));
+
+        var payload = NdefPayloadReader.Read(message.ToArray());
+
+        Assert.NotNull(payload);
+        var record = Assert.Single(payload!.Records);
+        Assert.Equal("T", record.Type);
+        Assert.Equal("hello", record.Text);
+        Assert.Equal("en", record.LanguageCode);
+    }
+
+    private static byte[] BuildMiddleChunk(byte[] payload)
+    {
+        // CF set, SR set, TNF 6 (unchanged), type length 0.
+        var message = new List<byte> { 0x20 | 0x10 | 0x06, 0x00, (byte)payload.Length };
         message.AddRange(payload);
         return message.ToArray();
     }

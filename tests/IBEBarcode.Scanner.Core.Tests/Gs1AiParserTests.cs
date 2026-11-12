@@ -114,4 +114,48 @@ public class Gs1AiParserTests
     {
         Assert.Equal(expected, Gs1AiParser.LooksLikeGs1(text));
     }
+
+    [Fact]
+    public void Parse_MeasureAi_KeepsLaterElements()
+    {
+        var elements = Gs1AiParser.Parse("3103000500" + "15240101" + "10ABC");
+
+        Assert.Equal(["3103", "15", "10"], elements.Select(e => e.Ai).ToArray());
+        Assert.Equal("000500", elements[0].Value);
+        Assert.Contains("Net weight", elements[0].Description);
+        Assert.Equal("240101", elements[1].Value);
+        Assert.Equal("ABC", elements[2].Value);
+    }
+
+    [Theory]
+    [InlineData("3203001234", "3203", "001234")]
+    [InlineData("3361000010", "3361", "000010")]
+    [InlineData("3952001999", "3952", "001999")]
+    public void Parse_SixDigitMeasureAis_AreRecognized(string text, string ai, string value)
+    {
+        var element = Assert.Single(Gs1AiParser.Parse(text));
+
+        Assert.Equal(ai, element.Ai);
+        Assert.Equal(value, element.Value);
+        Assert.NotNull(element.Description);
+    }
+
+    [Fact]
+    public void Parse_AmountPayable_IsVariableLength()
+    {
+        var elements = Gs1AiParser.Parse("3922199910LOT");
+
+        Assert.Equal(["3922", "10"], elements.Select(e => e.Ai).ToArray());
+        Assert.Equal("1999", elements[0].Value);
+    }
+
+    [Theory]
+    [InlineData("11 Oak Street")]
+    [InlineData("2000 Main St")]
+    [InlineData("12 Elm Road, Springfield")]
+    [InlineData("01 Main Street Suite 5")]
+    public void LooksLikeGs1_PlainText_IsNotGs1(string text)
+    {
+        Assert.False(Gs1AiParser.LooksLikeGs1(text));
+    }
 }

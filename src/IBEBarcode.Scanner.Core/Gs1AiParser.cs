@@ -131,6 +131,96 @@ public static class Gs1AiParser
         ["99"] = new(0, "Internal company use"),
     };
 
+    // Variable-measure trade item AIs (310n-369n) are all six digits, where the last digit of the AI
+    // is the number of implied decimal places. Keyed by the first three digits of the AI.
+    private static readonly Dictionary<string, string> MeasureAis = new(StringComparer.Ordinal)
+    {
+        ["310"] = "Net weight, kilograms",
+        ["311"] = "Length, metres",
+        ["312"] = "Width, metres",
+        ["313"] = "Height, metres",
+        ["314"] = "Area, square metres",
+        ["315"] = "Net volume, litres",
+        ["316"] = "Net volume, cubic metres",
+        ["320"] = "Net weight, pounds",
+        ["321"] = "Length, inches",
+        ["322"] = "Length, feet",
+        ["323"] = "Length, yards",
+        ["324"] = "Width, inches",
+        ["325"] = "Width, feet",
+        ["326"] = "Width, yards",
+        ["327"] = "Height, inches",
+        ["328"] = "Height, feet",
+        ["329"] = "Height, yards",
+        ["330"] = "Gross weight, kilograms",
+        ["331"] = "Length, metres (logistic)",
+        ["332"] = "Width, metres (logistic)",
+        ["333"] = "Height, metres (logistic)",
+        ["334"] = "Area, square metres (logistic)",
+        ["335"] = "Gross volume, litres (logistic)",
+        ["336"] = "Gross volume, cubic metres (logistic)",
+        ["337"] = "Kilograms per square metre",
+        ["340"] = "Gross weight, pounds",
+        ["341"] = "Length, inches (logistic)",
+        ["342"] = "Length, feet (logistic)",
+        ["343"] = "Length, yards (logistic)",
+        ["344"] = "Width, inches (logistic)",
+        ["345"] = "Width, feet (logistic)",
+        ["346"] = "Width, yards (logistic)",
+        ["347"] = "Height, inches (logistic)",
+        ["348"] = "Height, feet (logistic)",
+        ["349"] = "Height, yards (logistic)",
+        ["350"] = "Area, square inches",
+        ["351"] = "Area, square feet",
+        ["352"] = "Area, square yards",
+        ["353"] = "Area, square inches (logistic)",
+        ["354"] = "Area, square feet (logistic)",
+        ["355"] = "Area, square yards (logistic)",
+        ["356"] = "Net weight, troy ounces",
+        ["357"] = "Net weight, ounces",
+        ["360"] = "Net volume, quarts",
+        ["361"] = "Net volume, gallons",
+        ["362"] = "Gross volume, quarts (logistic)",
+        ["363"] = "Gross volume, gallons (logistic)",
+        ["364"] = "Net volume, cubic inches",
+        ["365"] = "Net volume, cubic feet",
+        ["366"] = "Net volume, cubic yards",
+        ["367"] = "Gross volume, cubic inches (logistic)",
+        ["368"] = "Gross volume, cubic feet (logistic)",
+        ["369"] = "Gross volume, cubic yards (logistic)",
+    };
+
+    /// <summary>
+    /// Finds an AI in the table, or matches the pattern AIs that are too numerous to list one by one:
+    /// 310n-369n (six-digit measures), 390n-393n (amounts payable, variable length), 394n (percentage
+    /// discount) and 395n (amount payable per unit of measure).
+    /// </summary>
+    private static AiInfo? Lookup(string ai)
+    {
+        if (KnownAis.TryGetValue(ai, out var known))
+            return known;
+
+        if (ai.Length != 4 || !ai.All(char.IsAsciiDigit))
+            return null;
+
+        var prefix = ai[..3];
+        var decimals = ai[3];
+
+        if (MeasureAis.TryGetValue(prefix, out var measure))
+            return new AiInfo(6, $"{measure} ({decimals} decimal places)");
+
+        return prefix switch
+        {
+            "390" => new AiInfo(0, $"Amount payable, single currency ({decimals} decimal places)"),
+            "391" => new AiInfo(0, $"Amount payable with ISO currency code ({decimals} decimal places)"),
+            "392" => new AiInfo(0, $"Amount payable per item, single currency ({decimals} decimal places)"),
+            "393" => new AiInfo(0, $"Amount payable per item with ISO currency code ({decimals} decimal places)"),
+            "394" => new AiInfo(4, $"Percentage discount of a coupon ({decimals} decimal places)"),
+            "395" => new AiInfo(6, $"Amount payable per unit of measure ({decimals} decimal places)"),
+            _ => null,
+        };
+    }
+
     /// <summary>Parses either notation. Returns an empty list when nothing GS1-like is present.</summary>
     public static IReadOnlyList<Gs1Element> Parse(string? text)
     {
@@ -173,17 +263,29 @@ public static class Gs1AiParser
 
     private static bool StartsWithKnownFixedAi(string value)
     {
+        if (!char.IsAsciiDigit(value[0]))
+            return false;
+
         foreach (var length in (int[])[4, 3, 2])
         {
             if (value.Length < length + 1)
                 continue;
 
             var ai = value[..length];
-            if (!KnownAis.TryGetValue(ai, out var info))
+            var info = Lookup(ai);
+            if (info is null)
                 continue;
 
             // Variable-length AIs need a separator to be unambiguous, so only fixed-length ones count.
-            if (info.FixedLength > 0 && value.Length - length >= info.FixedLength)
+            if (info.FixedLength <= 0 || value.Length - length < info.FixedLength)
+                continue;
+
+            // Ordinary text such as "11 Oak Street" or "2000 Main St" must not pass: the fixed field has
+            // to be all digits (every fixed-length numeric AI is), and whatever follows it has to be able
+            // to start another element, which always begins with a digit.
+            var fieldEnd = length + info.FixedLength;
+            if (!value.AsSpan(length, info.FixedLength).ContainsAnyExceptInRange('0', '9')
+                && (fieldEnd == value.Length || char.IsAsciiDigit(value[fieldEnd])))
                 return true;
         }
 
@@ -256,7 +358,7 @@ public static class Gs1AiParser
             var next = value.IndexOf('(', close + 1);
             var end = next < 0 ? value.Length : next;
             var elementValue = value[(close + 1)..end].Trim(GroupSeparator, ' ');
-            elements.Add(new Gs1Element(ai, KnownAis.GetValueOrDefault(ai)?.Description, elementValue));
+            elements.Add(new Gs1Element(ai, Lookup(ai)?.Description, elementValue));
 
             position = end;
         }
@@ -275,7 +377,8 @@ public static class Gs1AiParser
             if (!candidate.All(char.IsAsciiDigit))
                 continue;
 
-            if (KnownAis.TryGetValue(candidate, out var found))
+            var found = Lookup(candidate);
+            if (found is not null)
             {
                 ai = candidate;
                 info = found;

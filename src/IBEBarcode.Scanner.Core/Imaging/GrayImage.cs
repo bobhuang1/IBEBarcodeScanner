@@ -108,12 +108,13 @@ public sealed class GrayImage
     /// <summary>Nearest-neighbour downscale, keeping long edge at or below <paramref name="maxWidth"/>.</summary>
     public GrayImage DownscaleToWidth(int maxWidth)
     {
-        if (maxWidth <= 0 || Width <= maxWidth)
+        var longEdge = Math.Max(Width, Height);
+        if (maxWidth <= 0 || longEdge <= maxWidth)
             return this;
 
-        var scale = (double)Width / maxWidth;
-        var newWidth = maxWidth;
-        var newHeight = Math.Max(1, (int)(Height / scale));
+        var scale = (double)longEdge / maxWidth;
+        var newWidth = Width >= Height ? maxWidth : Math.Max(1, (int)(Width / scale));
+        var newHeight = Height >= Width ? maxWidth : Math.Max(1, (int)(Height / scale));
         var pixels = new byte[newWidth * newHeight];
 
         for (var y = 0; y < newHeight; y++)
